@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>शाळांची भौतिक सुविधा बाबतची माहिती</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+  :root {
+    --navy: #1c2b4a;
+    --navy2: #24365c;
+    --accent: #2f5aa8;
+    --accent-light: #eaf0fb;
+    --border: #bdc7d8;
+    --bg: #f4f6fb;
+    --text: #1c2230;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0 0 40px 0;
+    font-family: 'Mukta', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header.topbar {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+    color: #fff;
+    padding: 1rem 1.5rem;
+    position: sticky; top: 0; z-index: 50;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    text-align: center;
+  }
+  header.topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+  main { max-width: 900px; margin: 20px auto; padding: 0 15px; }
+  
+  details.section {
+    background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
+    margin-bottom: 15px; overflow: hidden;
+  }
+  details.section > summary {
+    list-style: none; cursor: pointer; padding: 12px 15px; background: var(--navy);
+    color: #fff; font-weight: 700; font-size: 1rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  details.section > summary::-webkit-details-marker { display: none; }
+  details.section > summary:after { content: '▾'; transition: transform .2s; }
+  details.section[open] > summary:after { transform: rotate(180deg); }
+  
+  .section-body { padding: 15px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+  @media (max-width: 600px) { .row2, .row3 { grid-template-columns: 1fr; } }
+  
+  label { display: block; font-size: 0.85rem; font-weight: 700; margin: 8px 0 4px; color: var(--navy2); }
+  input[type=text], input[type=number], input[type=date], select, textarea {
+    width: 100%; padding: 8px 10px; border: 1.5px solid var(--border);
+    border-radius: 6px; font-size: 0.95rem; font-family: inherit; background: #fcfcff;
+  }
+  input[readonly] { background: #eef1f8; font-weight: 600; color: #555; pointer-events: none; }
+  textarea { min-height: 60px; resize: vertical; }
+  
+  table.matrix {
+    width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem;
+    display: block; overflow-x: auto; white-space: nowrap;
+  }
+  table.matrix th, table.matrix td { border: 1.5px solid var(--border); padding: 6px; text-align: center; }
+  table.matrix th { background: var(--accent-light); color: var(--navy2); font-weight: 700; }
+  table.matrix td input, table.matrix td select { min-width: 60px; font-size: 0.85rem; padding: 4px; }
+  table.matrix td.lbl { text-align: left; font-weight: 700; background: #fafbff; white-space: normal; min-width: 120px; }
+  
+  .toolbar {
+    text-align: center; margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+  button {
+    background: var(--accent); color: #fff; border: none; padding: 10px 20px;
+    font-size: 1rem; font-weight: 700; border-radius: 8px; cursor: pointer; font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  button:hover { background: var(--navy); }
+  .excel-btn { background: #217346; } 
+  .excel-btn:hover { background: #154c2e; }
+  .online-btn { background: #d93025; } 
+  .online-btn:hover { background: #b0241b; }
+  
+  .hint { font-size: 0.75rem; color: #666; margin-top: -2px; margin-bottom: 8px; display: block; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>शाळांची भौतिक सुविधा बाबतची माहिती सादर करणे प्रपत्र</h1>
+</header>
+
+<main>
+  <form id="infraForm" onsubmit="event.preventDefault(); window.print();">
+    <!-- 1. शाळा व कर्मचारी माहिती -->
+    <details class="section" open>
+      <summary>१. शाळा, विद्यार्थी व कर्मचारी माहिती</summary>
+      <div class="section-body">
+        <div class="row2">
+          <div>
+            <label>१. शाळेचे नाव *</label>
+            <select id="schoolSelect" required></select>
+          </div>
+          <div>
+            <label>२. युडायस (U-DISE) नंबर</label>
+            <input type="text" id="udise" readonly placeholder="आपोआप भरले जाईल">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label>३. शाळेचा प्रकार</label>
+            <select id="schoolType">
+              <option value="प्राथमिक">प्राथमिक (Primary)</option>
+              <option value="उच्च प्राथमिक">उच्च प्राथमिक (Upper Primary)</option>
+              <option value="माध्यमिक">माध्यमिक (Secondary)</option>
+            </select>
+          </div>
+          <div>
+            <label>८. शाळेच्या जागेची मालकी</label>
+            <input type="text" id="landOwnership" placeholder="उदा. जि.प., ग्रामपंचायत, खाजगी">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label>४. मुख्याध्यापक यांचे नाव</label>
+            <input type="text" id="hmName" readonly placeholder="आपोआप भरले जाईल">
+          </div>
+          <div>
+            <label>मुख्याध्यापकांचा मोबाईल क्रमांक</label>
+            <input type="text" id="hmMobile" maxlength="10" pattern="[0-9]{10}">
+          </div>
+        </div>
+
+        <label>५. शाळा पीएमश्री / आदर्श या योजनेत सामाविष्ट आहे काय?</label>
+        <div class="row2">
+          <select id="isPmShri">
+            <option value="नाही">नाही</option>
+            <option value="आहे">आहे</option>
+          </select>
+          <input type="text" id="pmShriName" placeholder="असल्यास योजनेचे नाव">
+        </div>
+
+        <label>६. विद्यार्थी संख्या</label>
+        <div class="row3">
+          <div><span class="hint">मुले</span><input type="number" id="stuBoys" min="0" value="0" oninput="calcTotalStudents()"></div>
+          <div><span class="hint">मुली</span><input type="number" id="stuGirls" min="0" value="0" oninput="calcTotalStudents()"></div>
+          <div><span class="hint">एकूण</span><input type="number" id="stuTotal" readonly value="0"></div>
+        </div>
+
+        <label>७. शिक्षक संख्या</label>
+        <div class="row2">
+          <div><span class="hint">मान्य पदे</span><input type="number" id="teacherSanctioned" min="0"></div>
+          <div><span class="hint">कार्यरत पदे (डेटावरून)</span><input type="number" id="teacherWorking" readonly></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- 2. वर्गखोल्या बाबत माहिती -->
+    <details class="section" open>
+      <summary>२. वर्गखोल्या बाबत माहिती</summary>
+      <div class="section-body">
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th>सुस्थितीत</th>
+              <th>दुरुस्ती आवश्यक</th>
+              <th>धोकादायक</th>
+              <th>दुरुस्ती करिता आवश्यक रक्कम (₹)</th>
+              <th>धोकादायक निर्लेखन प्रस्ताव दाखल?</th>
+              <th>नवीन आवश्यक वर्गखोल्या</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" min="0"></td>
+              <td><input type="number" min="0"></td>
+              <td><input type="number" min="0"></td>
+              <td><input type="number" min="0" placeholder="रक्कम"></td>
+              <td><select><option>नाही</option><option>होय</option></select></td>
+              <td><input type="number" min="0"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- 3. स्वच्छतागृह व पाणी व्यवस्था -->
+    <details class="section" open>
+      <summary>३. स्वच्छतागृह (WASH) व पाणी व्यवस्था</summary>
+      <div class="section-body">
+        <span class="hint">९ ते १२ व १४. स्वच्छतागृह आणि मुतारी बाबत सविस्तर माहिती</span>
+        <table class="matrix" style="margin-bottom:15px;">
+          <thead>
+            <tr>
+              <th>प्रकार</th>
+              <th>उपलब्ध संख्या</th>
+              <th>वापरात</th>
+              <th>नादुरुस्त</th>
+              <th>धोकादायक</th>
+              <th>धोकादायक निर्लेखन प्रस्ताव?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="lbl">९. मुलींसाठी स्वच्छतागृह</td>
+              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
+            </tr>
+            <tr>
+              <td class="lbl">१०. मुलींसाठी मुतारी</td>
+              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
+            </tr>
+            <tr>
+              <td class="lbl">११. मुलांसाठी स्वच्छतागृह</td>
+              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
+            </tr>
+            <tr>
+              <td class="lbl">१२. मुलांसाठी मुतारी</td>
+              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
+            </tr>
+            <tr>
+              <td class="lbl">१४. दिव्यांगासाठी स्वच्छतागृह</td>
+              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="row2">
+          <div>
+            <label>१४ (ब). दिव्यांगासाठी कमोड चेअर तात्पुरती व्यवस्था?</label>
+            <select><option>नाही</option><option>आहे</option></select>
+          </div>
+          <div>
+            <label>१३. स्वच्छतागृहासाठी पाण्याची व्यवस्था</label>
+            <select>
+              <option value="आहे">आहे</option>
+              <option value="तात्पुरती">तात्पुरती</option>
+              <option value="नाही">नाही</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label>१५. पिण्याच्या पाण्याची व्यवस्था</label>
+            <select>
+              <option>नळाव्दारे</option>
+              <option>विंधन विहीर</option>
+              <option>इतर</option>
+            </select>
+          </div>
+          <div>
+            <label>१६. पिण्याच्या पाण्यासाठी वॉटर फिल्टर</label>
+            <select><option>आहे</option><option>नाही</option></select>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- 4. वीज व भौतिक सुविधा -->
+    <details class="section">
+      <summary>४. वीज, किचन शेड व भौतिक सुविधा</summary>
+      <div class="section-body">
+        <label>१७ व १९. शालेय विद्युतीकरण व सोलर पॅनल</label>
+        <div class="row3">
+          <div><span class="hint">विद्युत मीटर</span><select><option>आहे</option><option>नाही</option></select></div>
+          <div><span class="hint">ग्राहक क्रमांक</span><input type="text"></div>
+          <div><span class="hint">विद्युत बिल थकीत रक्कम (₹)</span><input type="number" min="0"></div>
+        </div>
+        <div class="row3">
+          <div><span class="hint">लाईट फिटींग पूर्ण वर्गखोल्या</span><input type="number" min="0"></div>
+          <div><span class="hint">लाईट फिटींग आवश्यक खोल्या</span><input type="number" min="0"></div>
+          <div><span class="hint">सोलर पॅनल आहे? (क्षमता - व्हॅट)</span><input type="text" placeholder="उदा. नाही / 5 KW"></div>
+        </div>
+
+        <label>१८. अपंगासाठी रॅम्प बाबत माहिती</label>
+        <select>
+          <option>सुस्थितीत (रेलींगसह)</option>
+          <option>रेलींग नाही</option>
+          <option>रॅम्प नाही</option>
+        </select>
+
+        <label>२०. किचन शेड बाबत माहिती</label>
+        <div class="row3">
+          <div><span class="hint">स्थिती</span>
+            <select>
+              <option>सुस्थितीत</option>
+              <option>दुरुस्ती आवश्यक</option>
+              <option>धोकादायक</option>
+            </select>
+          </div>
+          <div><span class="hint">दुरुस्ती रक्कम / निर्लेखन प्रस्ताव</span><input type="text" placeholder="रक्कम / प्रस्ताव दाखल?"></div>
+          <div><span class="hint">Fire Extinguishers</span><select><option>आहे</option><option>नाही</option></select></div>
+        </div>
+
+        <label>२१. शाळेसाठी संरक्षण भिंत बाबत माहिती</label>
+        <div class="row2">
+          <div><span class="hint">प्रकार</span>
+            <select><option>पक्की</option><option>कच्ची</option><option>तार कुंपण</option><option>नाही</option></select>
+          </div>
+          <div><span class="hint">स्थिती</span>
+            <select><option>सुस्थितीत</option><option>अर्धवट</option><option>दुरुस्ती आवश्यक</option><option>धोकादायक</option></select>
+          </div>
+        </div>
+
+        <label>२२. शाळेसाठी क्रीडांगण</label>
+        <div class="row2">
+          <div><span class="hint">उपलब्धता</span><select><option>आहे</option><option>नाही</option></select></div>
+          <div><span class="hint">असल्यास क्षेत्रफळ</span><input type="text" placeholder="उदा. 500 चौ.मी."></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- 5. शैक्षणिक, तंत्रज्ञान व इतर सुविधा -->
+    <details class="section">
+      <summary>५. शैक्षणिक, तंत्रज्ञान व इतर सुविधा</summary>
+      <div class="section-body">
+        <table class="matrix">
+          <thead>
+            <tr><th style="width:50%">सुविधा</th><th>आहे / नाही</th><th>तपशील / संख्या</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="lbl">२३. संगणक प्रयोगशाळा</td>
+              <td><select><option>आहे</option><option>नाही</option></select></td>
+              <td><input type="number" placeholder="संगणक संख्या"></td>
+            </tr>
+            <tr><td class="lbl">२४. विज्ञान प्रयोगशाळा</td>
+              <td><select><option>आहे</option><option>नाही</option></select></td>
+              <td>-</td>
+            </tr>
+            <tr><td class="lbl">२५. डिजीटल साहित्य</td>
+              <td><select><option>आहे</option><option>नाही</option></select></td>
+              <td><input type="number" placeholder="डिजीटल बोर्ड संख्या"></td>
+            </tr>
+            <tr><td class="lbl">२६. लायब्ररी</td>
+              <td><select><option>आहे</option><option>नाही</option></select></td>
+              <td>-</td>
+            </tr>
+            <tr><td class="lbl">२७. वायफाय सुविधा</td>
+              <td><select><option>आहे</option><option>नाही</option></select></td>
+              <td>-</td>
+            </tr>
+            <tr><td class="lbl">२८. बोलक्या भिंती</td>
+              <td><select><option>आहे</option><option>नाही</option></select></td>
+              <td><input type="number" placeholder="वर्गखोल्या संख्या"></td>
+            </tr>
+            <tr><td class="lbl">२९. परस बाग</td>
+              <td><select><option>आहे</option><option>नाही</option></select></td>
+              <td>-</td>
+            </tr>
+            <tr><td class="lbl">३०. खेळासाठी साहित्य</td>
+              <td><select><option>आहे</option><option>नाही</option></select></td>
+              <td><input type="text" placeholder="साहित्याचे विवरण"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <label>३१. सन 2025-26 मध्ये शिष्यवृत्ती / विविध स्पर्धा परिक्षा बाबत माहिती</label>
+        <div class="row2">
+          <div><span class="hint">सहभाग घेतलेले विद्यार्थी संख्या</span><input type="number" min="0"></div>
+          <div><span class="hint">पात्र विद्यार्थी संख्या</span><input type="number" min="0"></div>
+        </div>
+
+        <label>३२. शाळेव्दारे राबविण्यात येणारे विशेष उपक्रम</label>
+        <textarea placeholder="विशेष उपक्रमांची माहिती..."></textarea>
+      </div>
+    </details>
+
+    <!-- 6. पडताळणी -->
+    <details class="section" open>
+      <summary>६. स्वाक्षरी व पडताळणी</summary>
+      <div class="section-body">
+        <label>३३. भेट देणाऱ्या अधिकारी यांचा अभिप्राय</label>
+        <textarea placeholder="अभिप्राय नोंदवा..."></textarea>
+        <div class="row3" style="margin-top:15px;">
+          <div><span class="hint">दिनांक</span><input type="date" required></div>
+          <div><span class="hint">अधिकाऱ्याचे नाव</span><input type="text" required></div>
+          <div><span class="hint">हुद्दा</span><input type="text" required></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="toolbar">
+      <button type="submit">🖨️ प्रिंट करा</button>
+      <button type="button" class="excel-btn" onclick="exportToExcel()">📊 Excel डाउनलोड</button>
+      <button type="button" class="online-btn" id="onlineSubmitBtn" onclick="submitOnline()">☁️ ऑनलाईन सबमिट करा</button>
+    </div>
+  </form>
+</main>
+
+<script>
+const SCHOOLS = [
+  {name:"सी.पी.एस. रविवार पेठ", udise:"27270101612"},
+  {name:"जि.प.प्रा.शा. क्र. २, अंबाजोगाई", udise:"27270101613"},
+  {name:"जि.प.प्रा.शा. साकुड (मराठी)", udise:"27270102401"},
+  {name:"जि.प.प्रा.शा. साकुड (उर्दू)", udise:"27270102404"},
+  {name:"जि.प.प्रा.शा. काळवटी तांडा क्र. १", udise:"27270102501"},
+  {name:"जि.प.प्रा.शा. काळवटी तांडा क्र. ३", udise:"27270102502"},
+  {name:"जि.प.प्रा.शा. भीमाई वस्ती", udise:"27270102503"},
+  {name:"जि.प.प्रा.शा. काळवटी तांडा क्र. २", udise:"27270102601"},
+  {name:"जि.प.प्रा.शा. मांडवा पठाण", udise:"27270102701"},
+  {name:"जि.प.प्रा.शा. मांडवा तांडा", udise:"27270102801"},
+  {name:"जि.प.प्रा.शा. पोलेवाडी", udise:"27270102901"},
+  {name:"जि.प.प्रा.शा. नागझरी वसाहत", udise:"27270103001"},
+  {name:"जि.प.प्रा.शा. शेपवाडी", udise:"27270103101"},
+  {name:"जि.प.प्रा.शा. सह्याद्री नगर शेपवाडी", udise:"27270103102"},
+  {name:"जि.प.प्रा.शा. पिंपळा धायगुडा (मराठी)", udise:"27270103201"},
+  {name:"जि.प.प्रा.शा. पिंपळा धायगुडा (उर्दू)", udise:"27270103203"},
+  {name:"जि.प.प्रा.शा. वरवटी", udise:"27270103301"},
+  {name:"जि.प.प्रा.शा. उघडे वस्ती (वरवटी)", udise:"27270103303"},
+  {name:"जि.प.प्रा.शा. तलाव पाटी", udise:"27270103401"},
+  {name:"जि.प.प्रा.शा. अंबलवाडी", udise:"27270103501"},
+  {name:"जि. प. प्रा.शा. गोल्टावस्ती", udise:"27270103502"},
+  {name:"जि.प.प्रा.शा. गिरवली आपेट", udise:"27270103701"}
+];
+
+const HEADMASTERS = {
+  "सी.पी.एस. रविवार पेठ": "इंद्रजित शिवाजीराव डांगे",
+  "जि.प.प्रा.शा. क्र. २, अंबाजोगाई": "बळीराम शिवदास आकुसकर",
+  "जि.प.प्रा.शा. साकुड (मराठी)": "अंगद कोंडीबा घुले",
+  "जि.प.प्रा.शा. साकुड (उर्दू)": "आरिफ अहमद अब्दुल रशीद शेख",
+  "जि.प.प्रा.शा. काळवटी तांडा क्र. १": "उत्तम बाबुराव डोंगरे",
+  "जि.प.प्रा.शा. काळवटी तांडा क्र. ३": "मंजुषा भीमाशंकर जिडगे",
+  "जि.प.प्रा.शा. भीमाई वस्ती": "वंदना तुकाराम उजगरे",
+  "जि.प.प्रा.शा. काळवटी तांडा क्र. २": "संजय हणमंतराव कचकलवार",
+  "जि.प.प्रा.शा. मांडवा पठाण": "बापूराव राघुआप्पा धारेकर",
+  "जि.प.प्रा.शा. मांडवा तांडा": "संजय ज्ञानोबा पाडोळे",
+  "जि.प.प्रा.शा. पोलेवाडी": "राजेसाहेब वैजनाथराव सोमवंशी",
+  "जि.प.प्रा.शा. नागझरी वसाहत": "बालासाहेब व्यंकटराव कातळे",
+  "जि.प.प्रा.शा. शेपवाडी": "शैलजा उत्तमराव जोशी",
+  "जि.प.प्रा.शा. सह्याद्री नगर शेपवाडी": "अनिता सदाशिव नखाते",
+  "जि.प.प्रा.शा. पिंपळा धायगुडा (मराठी)": "संजीव कचरू उमाप",
+  "जि.प.प्रा.शा. पिंपळा धायगुडा (उर्दू)": "सय्यदा हिना सय्यद सरफराजोद्दीन",
+  "जि.प.प्रा.शा. वरवटी": "ज्योतीबाई देवीदासराव शिंदे",
+  "जि.प.प्रा.शा. उघडे वस्ती (वरवटी)": "शोभा अंगदराव चाटे",
+  "जि.प.प्रा.शा. तलाव पाटी": "मनीषा धोंडोपंत चिंचोलीकर",
+  "जि.प.प्रा.शा. अंबलवाडी": "आनंद पांडुरंग सिरसाट",
+  "जि. प. प्रा.शा. गोल्टावस्ती": "शालन नागनाथ जोगदंड",
+  "जि.प.प्रा.शा. गिरवली आपेट": "सुनिल आनंदराव फुलेवार"
+};
+
+const TEACHERS_DATA = {
+  "सी.पी.एस. रविवार पेठ": [ "उषाताई नारायण चव्हाण", "रेखा सुखदेव बनसोडे", "इंद्रजित शिवाजीराव डांगे", "रुपेश पांडुरंग लोंढे", "पुरुषोत्तम संभाप्पा रुद्राक्ष" ],
+  "जि.प.प्रा.शा. क्र. २, अंबाजोगाई": [ "बालासाहेब रामराव सोनवणे", "बळीराम शिवदास आकुसकर" ],
+  "जि.प.प्रा.शा. साकुड (मराठी)": [ "अंगद कोंडीबा घुले", "सुर्यवंशी सविता जगन्नाथ", "लव्हारे सुरेखा तुकाराम", "आघाव सुरेखा प्रल्हाद", "जाधव छाया मधुकर", "तोडकर माधुरी मुरली", "गायके शिल्पा तात्यासाहेब", "मुंडे मंगल विश्वनाथ", "राठोड विनायक घुगू" ],
+  "जि.प.प्रा.शा. साकुड (उर्दू)": [ "मोहम्मदगौसमोहिउद्दीन फकीरमोहम्मद शेख", "रेश्मा बेगम तुफैल अहमद खान पठाण", "तरन्नुम अहमद अली सय्यद", "अहमदी बेगम अब्दुल शुकुर साहेब फारुकी", "फारुकी शहेबाज सादेक", "आरिफ अहमद अब्दुल रशीद शेख", "सबीहानाझ जमील अहमद सिद्दीकी", "अयुब कलीम सय्यद" ],
+  "जि.प.प्रा.शा. काळवटी तांडा क्र. १": [ "कमल गंगाधर चिखले", "प्रभू बाबुराव खोडवे", "उत्तम बाबुराव डोंगरे" ],
+  "जि.प.प्रा.शा. काळवटी तांडा क्र. ३": [ "मंजुषा भीमाशंकर जिडगे", "नंदकुमार नामदेव सूर्यवंशी" ],
+  "जि.प.प्रा.शा. भीमाई वस्ती": [ "वंदना तुकाराम उजगरे", "वैजनाथ आबासाहेब गडदे" ],
+  "जि.प.प्रा.शा. काळवटी तांडा क्र. २": [ "संजय हणमंतराव कचकलवार", "पूनम किसन लेंगरे" ],
+  "जि.प.प्रा.शा. मांडवा पठाण": [ "मनीषा रत्नलिंग बिडवे", "बापूराव राघुआप्पा धारेकर", "सुरेश नामदेव निपाणीकर" ],
+  "जि.प.प्रा.शा. मांडवा तांडा": [ "पंचशीला मधुकर साळवी", "संजय ज्ञानोबा पाडोळे" ],
+  "जि.प.प्रा.शा. पोलेवाडी": [ "राजेसाहेब वैजनाथराव सोमवंशी", "सचिन नारायण गायकवाड" ],
+  "जि.प.प्रा.शा. नागझरी वसाहत": [ "संतोष माणिकराव गित्ते", "बालासाहेब व्यंकटराव कातळे" ],
+  "जि.प.प्रा.शा. शेपवाडी": [ "वैशाली विजय बुरांडे", "आशालता मनोहरराव लांब", "शैलजा उत्तमराव जोशी", "प्रशांत मारुतीराव बिरादार" ],
+  "जि.प.प्रा.शा. सह्याद्री नगर शेपवाडी": [ "मीनाक्षी प्रकाश लवटे", "अनिता सदाशिव नखाते" ],
+  "जि.प.प्रा.शा. पिंपळा धायगुडा (मराठी)": [ "भैय्यासाहेब तुकाराम जोगदंड", "प्रीती सुभाषचंद्र साहू", "संजीव कचरू उमाप", "गंगू मुरलीधर झाडे", "सुरेखा उमाकांत हिशोबे", "ज्योतीराम कोंडीबा कोल्हापुरे", "सीमा सखारामराव कदम", "विलास रामराव माचवे" ],
+  "जि.प.प्रा.शा. पिंपळा धायगुडा (उर्दू)": [ "सय्यदा हिना सय्यद सरफराजोद्दीन", "दायमी सय्यदा नुरुलहुदा अमीरोद्दीन", "खालीद हसनसाब सय्यद", "गौसिया बेगम अब्दुल अजीज शेख" ],
+  "जि.प.प्रा.शा. वरवटी": [ "ज्योतीबाई देवीदासराव शिंदे", "श्री सायस साखरोबा गर्जे" ],
+  "जि.प.प्रा.शा. उघडे वस्ती (वरवटी)": [ "रविकांत सुधाकरराव खेपकर", "शोभा अंगदराव चाटे" ],
+  "जि.प.प्रा.शा. तलाव पाटी": [ "मनीषा धोंडोपंत चिंचोलीकर", "श्रीदेवी मनोहर सिरसाट" ],
+  "जि.प.प्रा.शा. अंबलवाडी": [ "नवतीला रामराव जाधव", "भगवान आश्रुबा बिल्पे", "आनंद पांडुरंग सिरसाट", "रुक्मिणी हरिश्चंद्र दाभाडे" ],
+  "जि. प. प्रा.शा. गोल्टावस्ती": [ "सुरेखा अभिमान गालफाडे", "शालन नागनाथ जोगदंड" ],
+  "जि.प.प्रा.शा. गिरवली आपेट": [ "अर्जुन सूर्यकांत चव्हाण", "सुनिल आनंदराव फुलेवार" ]
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  const schoolSelect = document.getElementById("schoolSelect");
+  schoolSelect.innerHTML = '<option value="">-- शाळा निवडा --</option>';
+  SCHOOLS.forEach((school, index) => {
+    const opt = document.createElement("option");
+    opt.value = index;
+    opt.textContent = school.name;
+    schoolSelect.appendChild(opt);
+  });
+  schoolSelect.addEventListener("change", function() {
+    const val = this.value;
+    if (val === "") {
+      document.getElementById("udise").value = "";
+      document.getElementById("hmName").value = "";
+      document.getElementById("teacherWorking").value = "";
+      return;
+    }
+    const selectedSchool = SCHOOLS[val];
+    const schoolName = selectedSchool.name;
+    document.getElementById("udise").value = selectedSchool.udise;
+    document.getElementById("hmName").value = HEADMASTERS[schoolName] || "";
+    const teachersList = TEACHERS_DATA[schoolName] || [];
+    document.getElementById("teacherWorking").value = teachersList.length;
+  });
+});
+
+function calcTotalStudents() {
+  const boys = parseInt(document.getElementById("stuBoys").value) || 0;
+  const girls = parseInt(document.getElementById("stuGirls").value) || 0;
+  document.getElementById("stuTotal").value = boys + girls;
+}
+
+function getFormDataObj() {
+  let payload = {};
+  const val = (id) => document.getElementById(id) ? document.getElementById(id).value : "";
+  const textVal = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return "";
+    if (el.tagName === 'SELECT') return el.options[el.selectedIndex]?.text || "";
+    return el.value;
+  };
+
+  payload["शाळेचे नाव"] = textVal("schoolSelect");
+  payload["युडायस (U-DISE) नंबर"] = val("udise");
+  payload["शाळेचा प्रकार"] = textVal("schoolType");
+  payload["शाळेच्या जागेची मालकी"] = val("landOwnership");
+  payload["मुख्याध्यापक यांचे नाव"] = val("hmName");
+  payload["मुख्याध्यापकांचा मोबाईल क्रमांक"] = val("hmMobile");
+  payload["पीएमश्री / आदर्श योजना"] = textVal("isPmShri");
+  payload["योजनेचे नाव"] = val("pmShriName");
+  payload["विद्यार्थी संख्या (मुले)"] = val("stuBoys");
+  payload["विद्यार्थी संख्या (मुली)"] = val("stuGirls");
+  payload["विद्यार्थी संख्या (एकूण)"] = val("stuTotal");
+  payload["शिक्षक (मान्य पदे)"] = val("teacherSanctioned");
+  payload["शिक्षक (कार्यरत पदे)"] = val("teacherWorking");
+
+  const sections = document.querySelectorAll('details.section');
+  for (let i = 1; i < sections.length; i++) {
+    const sec = sections[i];
+    const inputs = sec.querySelectorAll('input, select, textarea');
+    inputs.forEach((input) => {
+      let labelText = input.placeholder || "माहिती";
+      let prev = input.previousElementSibling;
+      if (prev && (prev.tagName === 'LABEL' || prev.className.includes('hint') || prev.className.includes('lbl'))) {
+        labelText = prev.innerText;
+      } else {
+        let parentDiv = input.closest('div');
+        if (parentDiv && parentDiv.parentElement) {
+          let label = parentDiv.parentElement.querySelector('label');
+          if (label) {
+            let hint = parentDiv.querySelector('.hint');
+            labelText = label.innerText + (hint ? (" - " + hint.innerText) : "");
+          }
+        }
+      }
+      let td = input.closest('td');
+      if (td) {
+        let tr = td.closest('tr');
+        let table = td.closest('table');
+        if (table && tr) {
+          let rowLabelEl = tr.querySelector('.lbl');
+          let rowLabel = rowLabelEl ? rowLabelEl.innerText : "";
+          let colHeader = table.rows[0].cells[td.cellIndex]?.innerText || "";
+          labelText = rowLabel ? (rowLabel + " -> " + colHeader) : colHeader;
+        }
+      }
+      let value = (input.tagName === 'SELECT' && input.selectedIndex >= 0) ? input.options[input.selectedIndex].text : input.value;
+      
+      if(!payload[labelText]) {
+          payload[labelText] = value;
+      } else {
+          payload[labelText + " (" + Math.random().toString(36).substring(7) + ")"] = value;
+      }
+    });
+  }
+  return payload;
+}
+
+function exportToExcel() {
+  const schoolSelect = document.getElementById("schoolSelect");
+  if (!schoolSelect || schoolSelect.value === "") {
+    alert("कृपया प्रथम शाळा निवडा (Please select a school first).");
+    return;
+  }
+  const payload = getFormDataObj();
+  
+  let ws_data = [
+    ["शाळांची भौतिक सुविधा बाबतची माहिती"], [], ["तपशील", "माहिती / मूल्य"]
+  ];
+  
+  for (const [key, value] of Object.entries(payload)) {
+    ws_data.push([key, value]);
+  }
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(ws_data);
+  ws['!cols'] = [{ wch: 50 }, { wch: 30 }];
+  XLSX.utils.book_append_sheet(wb, ws, "School Data");
+  const udiseNum = document.getElementById("udise").value || "Report";
+  XLSX.writeFile(wb, "School_Infra_Data_" + udiseNum + ".xlsx");
+}
+
+/* ============================================================
+   ONLINE DATA SUBMISSION (GOOGLE APPS SCRIPT)
+   ============================================================ */
+// WEB APP URL INTEGRATED HERE
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxiHlIKs8U5jGgSFqN0ZokOAymG4LuSwgDRM1CiFm4QI5hcRMZeEFlgwjDryl-JsFI/exec"; 
+
+function submitOnline() {
+  const schoolSelect = document.getElementById("schoolSelect");
+  if (!schoolSelect || schoolSelect.value === "") {
+    alert("कृपया प्रथम शाळा निवडा (Please select a school first).");
+    return;
+  }
+
+  const btn = document.getElementById("onlineSubmitBtn");
+  btn.innerText = "⏳ पाठवत आहे... (Sending...)";
+  btn.disabled = true;
+
+  const payload = getFormDataObj();
+
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors', 
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    alert("माहिती यशस्वीरित्या ऑनलाईन सबमिट झाली! (Data submitted successfully!)");
+    btn.innerText = "☁️ ऑनलाईन सबमिट करा";
+    btn.disabled = false;
+  }).catch((error) => {
+    alert("तांत्रिक अडचण! कृपया पुन्हा प्रयत्न करा. (Error submitting data)");
+    console.error("Error:", error);
+    btn.innerText = "☁️ ऑनलाईन सबमिट करा";
+    btn.disabled = false;
+  });
+}
+</script>
+
+</body>
+</html>
