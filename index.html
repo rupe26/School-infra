@@ -94,6 +94,98 @@
   .online-btn:hover { background: #b0241b; }
   
   .hint { font-size: 0.75rem; color: #666; margin-top: -2px; margin-bottom: 8px; display: block; }
+
+  /* =========================================
+     OFFICIAL BLACK & WHITE PRINT FORMAT 
+     ========================================= */
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body { 
+      background: #fff !important; 
+      color: #000 !important; 
+      padding: 0 !important;
+    }
+    /* Hide the toolbar buttons */
+    .toolbar { 
+      display: none !important; 
+    }
+    /* Clean up main container */
+    main { 
+      max-width: 100% !important; 
+      margin: 0 !important; 
+      padding: 0 !important; 
+    }
+    /* Format header for official look */
+    header.topbar { 
+      background: transparent !important; 
+      color: #000 !important; 
+      box-shadow: none !important; 
+      border-bottom: 2px solid #000; 
+      padding: 0 0 10px 0; 
+      margin-bottom: 20px; 
+      position: static;
+    }
+    header.topbar h1 {
+      font-size: 1.5rem;
+    }
+    /* Make sections square with crisp black borders */
+    details.section { 
+      border: 1px solid #000 !important; 
+      border-radius: 0 !important; 
+      break-inside: avoid; 
+      margin-bottom: 10px;
+    }
+    /* Clean summary styling */
+    details.section > summary { 
+      background: transparent !important; 
+      color: #000 !important; 
+      border-bottom: 1px solid #000 !important; 
+      border-radius: 0 !important; 
+      font-size: 1.1rem; 
+      padding: 8px 10px;
+    }
+    /* Hide the dropdown arrow in print */
+    details.section > summary:after { 
+      display: none !important; 
+    }
+    /* Standard inputs format */
+    input[type=text], input[type=number], input[type=date], select, textarea {
+      background: #fff !important;
+      border: 1px solid #000 !important;
+      border-radius: 0 !important;
+      color: #000 !important;
+      box-shadow: none !important;
+      padding: 4px 6px;
+    }
+    /* Auto-filled inputs appear as text with dotted underline */
+    input[readonly] { 
+      background: transparent !important; 
+      border: none !important; 
+      border-bottom: 1px dashed #000 !important; 
+      font-weight: 700;
+    }
+    /* Table borders strictly black */
+    table.matrix th, table.matrix td, table.matrix td.lbl { 
+      border: 1px solid #000 !important; 
+      background: transparent !important; 
+      color: #000 !important; 
+    }
+    table.matrix th {
+      font-weight: bold;
+    }
+    /* Labels and hints set to black */
+    label { 
+      color: #000 !important; 
+      font-size: 0.9rem;
+    }
+    .hint { 
+      color: #333 !important; 
+      font-weight: normal; 
+    }
+  }
 </style>
 </head>
 <body>
@@ -357,7 +449,7 @@
               <td><select><option>आहे</option><option>नाही</option></select></td>
               <td><input type="number" placeholder="वर्गखोल्या संख्या"></td>
             </tr>
-            <tr><td class="lbl">२९. परस बाग</td>
+            <tr><td class="lbl">२९. پرस बाग</td>
               <td><select><option>आहे</option><option>नाही</option></select></td>
               <td>-</td>
             </tr>
@@ -475,6 +567,11 @@ const TEACHERS_DATA = {
   "जि.प.प्रा.शा. अंबलवाडी": [ "नवतीला रामराव जाधव", "भगवान आश्रुबा बिल्पे", "आनंद पांडुरंग सिरसाट", "रुक्मिणी हरिश्चंद्र दाभाडे" ],
   "जि. प. प्रा.शा. गोल्टावस्ती": [ "सुरेखा अभिमान गालफाडे", "शालन नागनाथ जोगदंड" ],
   "जि.प.प्रा.शा. गिरवली आपेट": [ "अर्जुन सूर्यकांत चव्हाण", "सुनिल आनंदराव फुलेवार" ]
+};
+
+// Ensure all details sections remain OPEN before printing to avoid hidden data
+window.onbeforeprint = function() {
+  document.querySelectorAll('details').forEach(el => el.setAttribute('open', ''));
 };
 
 document.addEventListener("DOMContentLoaded", () => {
