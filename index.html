@@ -94,7 +94,7 @@
   /* Mobile First Adjustments */
   @media (max-width: 600px) { 
     .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 16px; } 
-    .grid-2-mobile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } /* For tightly paired inputs like Boys/Girls */
+    .grid-2-mobile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } 
   }
   @media (min-width: 601px) {
     .grid-2-mobile { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
@@ -116,7 +116,6 @@
     border-radius: 8px; font-size: 1rem; 
     font-family: inherit; background: #fff;
     transition: border-color 0.2s;
-    /* Prevent iOS zoom on focus */
     appearance: none;
     -webkit-appearance: none;
   }
@@ -186,6 +185,12 @@
         <div class="field-group">
           <label>१. शाळेचे नाव *</label>
           <select id="schoolSelect" required></select>
+        </div>
+
+        <!-- नवीन शाळेचे नाव टाकण्यासाठी (फक्त इतर निवडल्यास दिसेल) -->
+        <div class="field-group" id="otherSchoolGroup" style="display: none;">
+          <label>नवीन शाळेचे नाव प्रविष्ट करा *</label>
+          <input type="text" id="otherSchoolName" placeholder="उदा. जि.प.प्रा.शा. नवीन गाव">
         </div>
 
         <div class="grid-2">
@@ -614,26 +619,73 @@ window.onbeforeprint = function() {
 document.addEventListener("DOMContentLoaded", () => {
   const schoolSelect = document.getElementById("schoolSelect");
   schoolSelect.innerHTML = '<option value="">-- शाळा निवडा --</option>';
+  
+  // अस्तित्वात असलेल्या शाळा जोडणे
   SCHOOLS.forEach((school, index) => {
     const opt = document.createElement("option");
     opt.value = index;
     opt.textContent = school.name;
     schoolSelect.appendChild(opt);
   });
+
+  // नवीन शाळा (Other) पर्याय जोडणे
+  const otherOpt = document.createElement("option");
+  otherOpt.value = "other";
+  otherOpt.textContent = "इतर (नवीन शाळा जोडा)";
+  schoolSelect.appendChild(otherOpt);
+
   schoolSelect.addEventListener("change", function() {
     const val = this.value;
-    if (val === "") {
-      document.getElementById("udise").value = "";
-      document.getElementById("hmName").value = "";
-      document.getElementById("teacherWorking").value = "";
-      return;
+    const otherGroup = document.getElementById("otherSchoolGroup");
+    const udiseInput = document.getElementById("udise");
+    const hmNameInput = document.getElementById("hmName");
+    const teacherWorkingInput = document.getElementById("teacherWorking");
+
+    if (val === "other") {
+      // इतर शाळा निवडल्यास सर्व बॉक्स रिकामे करून मॅन्युअल एंट्रीसाठी उघडणे
+      otherGroup.style.display = "block";
+      document.getElementById("otherSchoolName").setAttribute("required", "true");
+      
+      udiseInput.value = "";
+      hmNameInput.value = "";
+      teacherWorkingInput.value = "";
+      
+      udiseInput.removeAttribute("readonly");
+      hmNameInput.removeAttribute("readonly");
+      teacherWorkingInput.removeAttribute("readonly");
+      
+      udiseInput.placeholder = "नवीन युडायस नंबर टाका";
+      hmNameInput.placeholder = "मुख्याध्यापकांचे नाव टाका";
+      
+    } else if (val === "") {
+      // काहीही न निवडल्यास मूळ स्थितीत आणणे
+      otherGroup.style.display = "none";
+      document.getElementById("otherSchoolName").removeAttribute("required");
+      
+      udiseInput.value = "";
+      hmNameInput.value = "";
+      teacherWorkingInput.value = "";
+      
+      udiseInput.setAttribute("readonly", "true");
+      hmNameInput.setAttribute("readonly", "true");
+      teacherWorkingInput.setAttribute("readonly", "true");
+      
+    } else {
+      // यादीतील शाळा निवडल्यास डेटा आपोआप भरणे व बॉक्स लॉक करणे
+      otherGroup.style.display = "none";
+      document.getElementById("otherSchoolName").removeAttribute("required");
+      
+      const selectedSchool = SCHOOLS[val];
+      const schoolName = selectedSchool.name;
+      udiseInput.value = selectedSchool.udise;
+      hmNameInput.value = HEADMASTERS[schoolName] || "";
+      const teachersList = TEACHERS_DATA[schoolName] || [];
+      teacherWorkingInput.value = teachersList.length;
+      
+      udiseInput.setAttribute("readonly", "true");
+      hmNameInput.setAttribute("readonly", "true");
+      teacherWorkingInput.setAttribute("readonly", "true");
     }
-    const selectedSchool = SCHOOLS[val];
-    const schoolName = selectedSchool.name;
-    document.getElementById("udise").value = selectedSchool.udise;
-    document.getElementById("hmName").value = HEADMASTERS[schoolName] || "";
-    const teachersList = TEACHERS_DATA[schoolName] || [];
-    document.getElementById("teacherWorking").value = teachersList.length;
   });
 });
 
@@ -652,8 +704,16 @@ function getFormDataObj() {
     return el.value;
   };
 
+  // शाळेचे नाव ठरवणे (यादीतील की नवीन टाकलेले)
+  let finalSchoolName = "";
+  if (document.getElementById("schoolSelect").value === "other") {
+    finalSchoolName = document.getElementById("otherSchoolName").value;
+  } else {
+    finalSchoolName = textVal("schoolSelect");
+  }
+
   let payload = {
-    "शाळेचे नाव": textVal("schoolSelect"),
+    "शाळेचे नाव": finalSchoolName,
     "युडायस (U-DISE) नंबर": val("udise"),
     "शाळेचा प्रकार": textVal("schoolType"),
     "शाळेच्या जागेची मालकी": val("landOwnership"),
