@@ -2,7 +2,7 @@
 <html lang="mr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>शाळांची भौतिक सुविधा बाबतची माहिती</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,349 +16,363 @@
     --accent: #2f5aa8;
     --accent-light: #eaf0fb;
     --border: #bdc7d8;
-    --bg: #f4f6fb;
+    --bg: #f0f2f5;
+    --card-bg: #ffffff;
     --text: #1c2230;
+    --text-muted: #555;
   }
+  
   * { box-sizing: border-box; }
+  
   body {
-    margin: 0; padding: 0 0 40px 0;
+    margin: 0; padding: 0 0 80px 0;
     font-family: 'Mukta', sans-serif;
     background: var(--bg);
     color: var(--text);
   }
+  
   header.topbar {
     background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
     color: #fff;
-    padding: 1rem 1.5rem;
+    padding: 1rem;
     position: sticky; top: 0; z-index: 50;
-    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
     text-align: center;
   }
-  header.topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }a
-  main { max-width: 900px; margin: 20px auto; padding: 0 15px; }
   
+  header.topbar h1 { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.4; }
+  
+  main { max-width: 800px; margin: 15px auto; padding: 0 10px; }
+  
+  /* Linear Accordion Styling */
   details.section {
-    background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
-    margin-bottom: 15px; overflow: hidden;
+    background: var(--card-bg); 
+    border-radius: 12px;
+    margin-bottom: 15px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
   }
+  
   details.section > summary {
-    list-style: none; cursor: pointer; padding: 12px 15px; background: var(--navy);
-    color: #fff; font-weight: 700; font-size: 1rem;
+    list-style: none; cursor: pointer; 
+    padding: 14px 16px; 
+    background: var(--navy);
+    color: #fff; font-weight: 700; font-size: 1.05rem;
     display: flex; justify-content: space-between; align-items: center;
   }
+  
   details.section > summary::-webkit-details-marker { display: none; }
-  details.section > summary:after { content: '▾'; transition: transform .2s; }
+  details.section > summary:after { content: '▼'; font-size: 0.8rem; transition: transform .3s ease; }
   details.section[open] > summary:after { transform: rotate(180deg); }
   
-  .section-body { padding: 15px; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 10px; }
-  @media (max-width: 600px) { .row2, .row3 { grid-template-columns: 1fr; } }
+  .section-body { padding: 16px; }
   
-  label { display: block; font-size: 0.85rem; font-weight: 700; margin: 8px 0 4px; color: var(--navy2); }
+  /* Form Layout */
+  .field-group {
+    margin-bottom: 16px;
+  }
+  
+  .sub-card {
+    background: var(--accent-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .sub-card h4 {
+    margin: 0 0 12px 0;
+    color: var(--navy2);
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+  }
+  
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  
+  /* Mobile First Adjustments */
+  @media (max-width: 600px) { 
+    .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 16px; } 
+    .grid-2-mobile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } /* For tightly paired inputs like Boys/Girls */
+  }
+  @media (min-width: 601px) {
+    .grid-2-mobile { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  }
+  
+  label { 
+    display: block; font-size: 0.9rem; font-weight: 600; 
+    margin-bottom: 6px; color: var(--navy2); 
+  }
+  
+  .hint { 
+    font-size: 0.8rem; color: var(--text-muted); 
+    display: block; margin-bottom: 4px; font-weight: 500;
+  }
+  
   input[type=text], input[type=number], input[type=date], select, textarea {
-    width: 100%; padding: 8px 10px; border: 1.5px solid var(--border);
-    border-radius: 6px; font-size: 0.95rem; font-family: inherit; background: #fcfcff;
+    width: 100%; padding: 10px 12px; 
+    border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 1rem; 
+    font-family: inherit; background: #fff;
+    transition: border-color 0.2s;
+    /* Prevent iOS zoom on focus */
+    appearance: none;
+    -webkit-appearance: none;
   }
-  input[readonly] { background: #eef1f8; font-weight: 600; color: #555; pointer-events: none; }
-  textarea { min-height: 60px; resize: vertical; }
   
-  table.matrix {
-    width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem;
-    display: block; overflow-x: auto; white-space: nowrap;
+  input:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--accent);
   }
-  table.matrix th, table.matrix td { border: 1.5px solid var(--border); padding: 6px; text-align: center; }
-  table.matrix th { background: var(--accent-light); color: var(--navy2); font-weight: 700; }
-  table.matrix td input, table.matrix td select { min-width: 60px; font-size: 0.85rem; padding: 4px; }
-  table.matrix td.lbl { text-align: left; font-weight: 700; background: #fafbff; white-space: normal; min-width: 120px; }
   
+  input[readonly] { 
+    background: #eef1f8; font-weight: 600; 
+    color: var(--text-muted); border-color: transparent; 
+  }
+  
+  textarea { min-height: 80px; resize: vertical; }
+  
+  /* Floating Bottom Toolbar for Mobile */
   .toolbar {
-    text-align: center; margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: #fff; padding: 12px;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+    display: flex; gap: 10px; justify-content: center;
+    z-index: 100;
   }
-  button {
-    background: var(--accent); color: #fff; border: none; padding: 10px 20px;
-    font-size: 1rem; font-weight: 700; border-radius: 8px; cursor: pointer; font-family: inherit;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  button:hover { background: var(--navy); }
-  .excel-btn { background: #217346; } 
-  .excel-btn:hover { background: #154c2e; }
-  .online-btn { background: #d93025; } 
-  .online-btn:hover { background: #b0241b; }
   
-  .hint { font-size: 0.75rem; color: #666; margin-top: -2px; margin-bottom: 8px; display: block; }
-
-  /* =========================================
-     OFFICIAL BLACK & WHITE PRINT FORMAT 
-     ========================================= */
+  button {
+    flex: 1; max-width: 250px;
+    background: var(--accent); color: #fff; border: none; 
+    padding: 12px; font-size: 1rem; font-weight: 700; 
+    border-radius: 8px; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  
+  button:hover { opacity: 0.9; }
+  .excel-btn { background: #217346; } 
+  .online-btn { background: #d93025; } 
+  .print-btn { background: var(--navy2); }
+  
+  /* Print Styles */
   @media print {
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    body { 
-      background: #fff !important; 
-      color: #000 !important; 
-      padding: 0 !important;
-    }
-    /* Hide the toolbar buttons */
-    .toolbar { 
-      display: none !important; 
-    }
-    /* Clean up main container */
-    main { 
-      max-width: 100% !important; 
-      margin: 0 !important; 
-      padding: 0 !important; 
-    }
-    /* Format header for official look */
-    header.topbar { 
-      background: transparent !important; 
-      color: #000 !important; 
-      box-shadow: none !important; 
-      border-bottom: 2px solid #000; 
-      padding: 0 0 10px 0; 
-      margin-bottom: 20px; 
-      position: static;
-    }
-    header.topbar h1 {
-      font-size: 1.5rem;
-    }
-    /* Make sections square with crisp black borders */
-    details.section { 
-      border: 1px solid #000 !important; 
-      border-radius: 0 !important; 
-      break-inside: avoid; 
-      margin-bottom: 10px;
-    }
-    /* Clean summary styling */
-    details.section > summary { 
-      background: transparent !important; 
-      color: #000 !important; 
-      border-bottom: 1px solid #000 !important; 
-      border-radius: 0 !important; 
-      font-size: 1.1rem; 
-      padding: 8px 10px;
-    }
-    /* Hide the dropdown arrow in print */
-    details.section > summary:after { 
-      display: none !important; 
-    }
-    /* Standard inputs format */
-    input[type=text], input[type=number], input[type=date], select, textarea {
-      background: #fff !important;
-      border: 1px solid #000 !important;
-      border-radius: 0 !important;
-      color: #000 !important;
-      box-shadow: none !important;
-      padding: 4px 6px;
-    }
-    /* Auto-filled inputs appear as text with dotted underline */
-    input[readonly] { 
-      background: transparent !important; 
-      border: none !important; 
-      border-bottom: 1px dashed #000 !important; 
-      font-weight: 700;
-    }
-    /* Table borders strictly black */
-    table.matrix th, table.matrix td, table.matrix td.lbl { 
-      border: 1px solid #000 !important; 
-      background: transparent !important; 
-      color: #000 !important; 
-    }
-    table.matrix th {
-      font-weight: bold;
-    }
-    /* Labels and hints set to black */
-    label { 
-      color: #000 !important; 
-      font-size: 0.9rem;
-    }
-    .hint { 
-      color: #333 !important; 
-      font-weight: normal; 
-    }
+    body { background: #fff !important; color: #000 !important; padding: 0 !important; }
+    .toolbar { display: none !important; }
+    main { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+    header.topbar { background: transparent !important; color: #000 !important; box-shadow: none !important; border-bottom: 2px solid #000; padding: 0 0 10px 0; margin-bottom: 20px; position: static; }
+    details.section { border: 1px solid #000 !important; border-radius: 0 !important; break-inside: avoid; margin-bottom: 10px; box-shadow: none; }
+    details.section > summary { background: transparent !important; color: #000 !important; border-bottom: 1px solid #000 !important; font-size: 1.1rem; padding: 8px 10px; }
+    details.section > summary:after { display: none !important; }
+    .sub-card { background: transparent; border: 1px dashed #666; padding: 8px; margin-bottom: 10px; break-inside: avoid;}
+    input[type=text], input[type=number], input[type=date], select, textarea { background: #fff !important; border: 1px solid #000 !important; border-radius: 0 !important; color: #000 !important; padding: 4px 6px; }
+    input[readonly] { background: transparent !important; border: none !important; border-bottom: 1px dashed #000 !important; }
   }
 </style>
 </head>
 <body>
 
 <header class="topbar">
-  <h1>शाळांची भौतिक सुविधा बाबतची माहिती सादर करणे प्रपत्र</h1>
+  <h1>शाळांची भौतिक सुविधा माहिती प्रपत्र</h1>
 </header>
 
 <main>
   <form id="infraForm" onsubmit="event.preventDefault(); window.print();">
+    
     <!-- 1. शाळा व कर्मचारी माहिती -->
     <details class="section" open>
-      <summary>१. शाळा, विद्यार्थी व कर्मचारी माहिती</summary>
+      <summary>१. शाळा, विद्यार्थी व कर्मचारी</summary>
       <div class="section-body">
-        <div class="row2">
-          <div>
-            <label>१. शाळेचे नाव *</label>
-            <select id="schoolSelect" required></select>
-          </div>
-          <div>
+        
+        <div class="field-group">
+          <label>१. शाळेचे नाव *</label>
+          <select id="schoolSelect" required></select>
+        </div>
+
+        <div class="grid-2">
+          <div class="field-group">
             <label>२. युडायस (U-DISE) नंबर</label>
             <input type="text" id="udise" readonly placeholder="आपोआप भरले जाईल">
           </div>
-        </div>
-
-        <div class="row2">
-          <div>
+          <div class="field-group">
             <label>३. शाळेचा प्रकार</label>
             <select id="schoolType">
-              <option value="प्राथमिक">प्राथमिक (Primary)</option>
-              <option value="उच्च प्राथमिक">उच्च प्राथमिक (Upper Primary)</option>
-              <option value="माध्यमिक">माध्यमिक (Secondary)</option>
+              <option value="प्राथमिक">प्राथमिक</option>
+              <option value="उच्च प्राथमिक">उच्च प्राथमिक</option>
+              <option value="माध्यमिक">माध्यमिक</option>
             </select>
           </div>
-          <div>
-            <label>८. शाळेच्या जागेची मालकी</label>
-            <input type="text" id="landOwnership" placeholder="उदा. जि.प., ग्रामपंचायत, खाजगी">
-          </div>
         </div>
 
-        <div class="row2">
-          <div>
-            <label>४. मुख्याध्यापक यांचे नाव</label>
+        <div class="field-group">
+          <label>४. शाळेच्या जागेची मालकी</label>
+          <input type="text" id="landOwnership" placeholder="उदा. जि.प., ग्रामपंचायत, खाजगी">
+        </div>
+
+        <div class="grid-2">
+          <div class="field-group">
+            <label>५. मुख्याध्यापक यांचे नाव</label>
             <input type="text" id="hmName" readonly placeholder="आपोआप भरले जाईल">
           </div>
-          <div>
+          <div class="field-group">
             <label>मुख्याध्यापकांचा मोबाईल क्रमांक</label>
-            <input type="text" id="hmMobile" maxlength="10" pattern="[0-9]{10}">
+            <input type="text" id="hmMobile" maxlength="10" pattern="[0-9]{10}" inputmode="numeric">
           </div>
         </div>
 
-        <label>५. शाळा पीएमश्री / आदर्श या योजनेत सामाविष्ट आहे काय?</label>
-        <div class="row2">
-          <select id="isPmShri">
-            <option value="नाही">नाही</option>
-            <option value="आहे">आहे</option>
-          </select>
-          <input type="text" id="pmShriName" placeholder="असल्यास योजनेचे नाव">
+        <div class="sub-card">
+          <label>६. शाळा पीएमश्री / आदर्श या योजनेत सामाविष्ट आहे काय?</label>
+          <div class="grid-2">
+            <select id="isPmShri">
+              <option value="नाही">नाही</option>
+              <option value="आहे">आहे</option>
+            </select>
+            <input type="text" id="pmShriName" placeholder="असल्यास योजनेचे नाव">
+          </div>
         </div>
 
-        <label>६. विद्यार्थी संख्या</label>
-        <div class="row3">
-          <div><span class="hint">मुले</span><input type="number" id="stuBoys" min="0" value="0" oninput="calcTotalStudents()"></div>
-          <div><span class="hint">मुली</span><input type="number" id="stuGirls" min="0" value="0" oninput="calcTotalStudents()"></div>
-          <div><span class="hint">एकूण</span><input type="number" id="stuTotal" readonly value="0"></div>
+        <div class="sub-card">
+          <h4>७. विद्यार्थी संख्या</h4>
+          <div class="grid-2-mobile">
+            <div><span class="hint">मुले</span><input type="number" id="stuBoys" min="0" value="0" oninput="calcTotalStudents()"></div>
+            <div><span class="hint">मुली</span><input type="number" id="stuGirls" min="0" value="0" oninput="calcTotalStudents()"></div>
+            <div><span class="hint">एकूण</span><input type="number" id="stuTotal" readonly value="0"></div>
+          </div>
         </div>
 
-        <label>७. शिक्षक संख्या</label>
-        <div class="row2">
-          <div><span class="hint">मान्य पदे</span><input type="number" id="teacherSanctioned" min="0"></div>
-          <div><span class="hint">कार्यरत पदे (डेटावरून)</span><input type="number" id="teacherWorking" readonly></div>
+        <div class="sub-card">
+          <h4>८. शिक्षक संख्या</h4>
+          <div class="grid-2-mobile">
+            <div><span class="hint">मान्य पदे</span><input type="number" id="teacherSanctioned" min="0"></div>
+            <div><span class="hint">कार्यरत पदे (डेटावरून)</span><input type="number" id="teacherWorking" readonly></div>
+          </div>
         </div>
+
       </div>
     </details>
 
     <!-- 2. वर्गखोल्या बाबत माहिती -->
-    <details class="section" open>
-      <summary>२. वर्गखोल्या बाबत माहिती</summary>
+    <details class="section">
+      <summary>२. वर्गखोल्या (Classrooms)</summary>
       <div class="section-body">
-        <table class="matrix">
-          <thead>
-            <tr>
-              <th>सुस्थितीत</th>
-              <th>दुरुस्ती आवश्यक</th>
-              <th>धोकादायक</th>
-              <th>दुरुस्ती करिता आवश्यक रक्कम (₹)</th>
-              <th>धोकादायक निर्लेखन प्रस्ताव दाखल?</th>
-              <th>नवीन आवश्यक वर्गखोल्या</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><input type="number" min="0"></td>
-              <td><input type="number" min="0"></td>
-              <td><input type="number" min="0"></td>
-              <td><input type="number" min="0" placeholder="रक्कम"></td>
-              <td><select><option>नाही</option><option>होय</option></select></td>
-              <td><input type="number" min="0"></td>
-            </tr>
-          </tbody>
-        </table>
+        
+        <div class="grid-2">
+          <div class="field-group">
+            <label>सुस्थितीत असलेल्या वर्गखोल्या</label>
+            <input type="number" id="classGood" min="0">
+          </div>
+          <div class="field-group">
+            <label>दुरुस्ती आवश्यक वर्गखोल्या</label>
+            <input type="number" id="classRepair" min="0">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field-group">
+            <label>धोकादायक वर्गखोल्या</label>
+            <input type="number" id="classDanger" min="0">
+          </div>
+          <div class="field-group">
+            <label>धोकादायक निर्लेखन प्रस्ताव दाखल?</label>
+            <select id="classWriteoff"><option>नाही</option><option>होय</option></select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field-group">
+            <label>दुरुस्ती करिता आवश्यक रक्कम (₹)</label>
+            <input type="number" id="classRepairCost" min="0" placeholder="रक्कम">
+          </div>
+          <div class="field-group">
+            <label>नवीन आवश्यक वर्गखोल्या संख्या</label>
+            <input type="number" id="classNewReq" min="0">
+          </div>
+        </div>
+
       </div>
     </details>
 
     <!-- 3. स्वच्छतागृह व पाणी व्यवस्था -->
-    <details class="section" open>
-      <summary>३. स्वच्छतागृह (WASH) व पाणी व्यवस्था</summary>
+    <details class="section">
+      <summary>३. WASH (स्वच्छतागृह व पाणी)</summary>
       <div class="section-body">
-        <span class="hint">९ ते १२ व १४. स्वच्छतागृह आणि मुतारी बाबत सविस्तर माहिती</span>
-        <table class="matrix" style="margin-bottom:15px;">
-          <thead>
-            <tr>
-              <th>प्रकार</th>
-              <th>उपलब्ध संख्या</th>
-              <th>वापरात</th>
-              <th>नादुरुस्त</th>
-              <th>धोकादायक</th>
-              <th>धोकादायक निर्लेखन प्रस्ताव?</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="lbl">९. मुलींसाठी स्वच्छतागृह</td>
-              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
-            </tr>
-            <tr>
-              <td class="lbl">१०. मुलींसाठी मुतारी</td>
-              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
-            </tr>
-            <tr>
-              <td class="lbl">११. मुलांसाठी स्वच्छतागृह</td>
-              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
-            </tr>
-            <tr>
-              <td class="lbl">१२. मुलांसाठी मुतारी</td>
-              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
-            </tr>
-            <tr>
-              <td class="lbl">१४. दिव्यांगासाठी स्वच्छतागृह</td>
-              <td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><input type="number" min="0"></td><td><select><option>नाही</option><option>होय</option></select></td>
-            </tr>
-          </tbody>
-        </table>
         
-        <div class="row2">
-          <div>
-            <label>१४ (ब). दिव्यांगासाठी कमोड चेअर तात्पुरती व्यवस्था?</label>
-            <select><option>नाही</option><option>आहे</option></select>
-          </div>
-          <div>
-            <label>१३. स्वच्छतागृहासाठी पाण्याची व्यवस्था</label>
-            <select>
-              <option value="आहे">आहे</option>
-              <option value="तात्पुरती">तात्पुरती</option>
-              <option value="नाही">नाही</option>
-            </select>
+        <div class="sub-card">
+          <h4>९. मुलींसाठी स्वच्छतागृह</h4>
+          <div class="grid-2-mobile">
+            <div><span class="hint">एकूण उपलब्ध</span><input type="number" id="toiletGirlTotal" min="0"></div>
+            <div><span class="hint">वापरात</span><input type="number" id="toiletGirlUse" min="0"></div>
+            <div><span class="hint">नादुरुस्त</span><input type="number" id="toiletGirlBad" min="0"></div>
+            <div><span class="hint">धोकादायक</span><input type="number" id="toiletGirlDanger" min="0"></div>
+            <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="toiletGirlWriteoff"><option>नाही</option><option>होय</option></select></div>
           </div>
         </div>
 
-        <div class="row2">
-          <div>
-            <label>१५. पिण्याच्या पाण्याची व्यवस्था</label>
-            <select>
-              <option>नळाव्दारे</option>
-              <option>विंधन विहीर</option>
-              <option>इतर</option>
-            </select>
-          </div>
-          <div>
-            <label>१६. पिण्याच्या पाण्यासाठी वॉटर फिल्टर</label>
-            <select><option>आहे</option><option>नाही</option></select>
+        <div class="sub-card">
+          <h4>१०. मुलींसाठी मुतारी</h4>
+          <div class="grid-2-mobile">
+            <div><span class="hint">एकूण उपलब्ध</span><input type="number" id="urinalGirlTotal" min="0"></div>
+            <div><span class="hint">वापरात</span><input type="number" id="urinalGirlUse" min="0"></div>
+            <div><span class="hint">नादुरुस्त</span><input type="number" id="urinalGirlBad" min="0"></div>
+            <div><span class="hint">धोकादायक</span><input type="number" id="urinalGirlDanger" min="0"></div>
+            <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="urinalGirlWriteoff"><option>नाही</option><option>होय</option></select></div>
           </div>
         </div>
+
+        <div class="sub-card">
+          <h4>११. मुलांसाठी स्वच्छतागृह</h4>
+          <div class="grid-2-mobile">
+            <div><span class="hint">एकूण उपलब्ध</span><input type="number" id="toiletBoyTotal" min="0"></div>
+            <div><span class="hint">वापरात</span><input type="number" id="toiletBoyUse" min="0"></div>
+            <div><span class="hint">नादुरुस्त</span><input type="number" id="toiletBoyBad" min="0"></div>
+            <div><span class="hint">धोकादायक</span><input type="number" id="toiletBoyDanger" min="0"></div>
+            <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="toiletBoyWriteoff"><option>नाही</option><option>होय</option></select></div>
+          </div>
+        </div>
+
+        <div class="sub-card">
+          <h4>१२. मुलांसाठी मुतारी</h4>
+          <div class="grid-2-mobile">
+            <div><span class="hint">एकूण उपलब्ध</span><input type="number" id="urinalBoyTotal" min="0"></div>
+            <div><span class="hint">वापरात</span><input type="number" id="urinalBoyUse" min="0"></div>
+            <div><span class="hint">नादुरुस्त</span><input type="number" id="urinalBoyBad" min="0"></div>
+            <div><span class="hint">धोकादायक</span><input type="number" id="urinalBoyDanger" min="0"></div>
+            <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="urinalBoyWriteoff"><option>नाही</option><option>होय</option></select></div>
+          </div>
+        </div>
+
+        <div class="sub-card">
+          <h4>१४. दिव्यांगासाठी स्वच्छतागृह</h4>
+          <div class="grid-2-mobile">
+            <div><span class="hint">एकूण उपलब्ध</span><input type="number" id="toiletCwsnTotal" min="0"></div>
+            <div><span class="hint">वापरात</span><input type="number" id="toiletCwsnUse" min="0"></div>
+            <div><span class="hint">नादुरुस्त</span><input type="number" id="toiletCwsnBad" min="0"></div>
+            <div><span class="hint">धोकादायक</span><input type="number" id="toiletCwsnDanger" min="0"></div>
+            <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="toiletCwsnWriteoff"><option>नाही</option><option>होय</option></select></div>
+          </div>
+        </div>
+
+        <div class="sub-card">
+          <h4>पाणी व इतर व्यवस्था</h4>
+          <div class="grid-2">
+            <div class="field-group">
+              <span class="hint">१४ (ब). कमोड चेअर तात्पुरती व्यवस्था?</span>
+              <select id="cwsnCommode"><option>नाही</option><option>आहे</option></select>
+            </div>
+            <div class="field-group">
+              <span class="hint">१३. स्वच्छतागृहासाठी पाण्याची व्यवस्था</span>
+              <select id="toiletWater"><option value="आहे">आहे</option><option value="तात्पुरती">तात्पुरती</option><option value="नाही">नाही</option></select>
+            </div>
+            <div class="field-group">
+              <span class="hint">१५. पिण्याच्या पाण्याची व्यवस्था</span>
+              <select id="drinkWater"><option>नळाव्दारे</option><option>विंधन विहीर</option><option>इतर</option></select>
+            </div>
+            <div class="field-group">
+              <span class="hint">१६. पिण्याच्या पाण्यासाठी वॉटर फिल्टर</span>
+              <select id="waterFilter"><option>आहे</option><option>नाही</option></select>
+            </div>
+          </div>
+        </div>
+
       </div>
     </details>
 
@@ -366,108 +380,128 @@
     <details class="section">
       <summary>४. वीज, किचन शेड व भौतिक सुविधा</summary>
       <div class="section-body">
-        <label>१७ व १९. शालेय विद्युतीकरण व सोलर पॅनल</label>
-        <div class="row3">
-          <div><span class="hint">विद्युत मीटर</span><select><option>आहे</option><option>नाही</option></select></div>
-          <div><span class="hint">ग्राहक क्रमांक</span><input type="text"></div>
-          <div><span class="hint">विद्युत बिल थकीत रक्कम (₹)</span><input type="number" min="0"></div>
-        </div>
-        <div class="row3">
-          <div><span class="hint">लाईट फिटींग पूर्ण वर्गखोल्या</span><input type="number" min="0"></div>
-          <div><span class="hint">लाईट फिटींग आवश्यक खोल्या</span><input type="number" min="0"></div>
-          <div><span class="hint">सोलर पॅनल आहे? (क्षमता - व्हॅट)</span><input type="text" placeholder="उदा. नाही / 5 KW"></div>
-        </div>
-
-        <label>१८. अपंगासाठी रॅम्प बाबत माहिती</label>
-        <select>
-          <option>सुस्थितीत (रेलींगसह)</option>
-          <option>रेलींग नाही</option>
-          <option>रॅम्प नाही</option>
-        </select>
-
-        <label>२०. किचन शेड बाबत माहिती</label>
-        <div class="row3">
-          <div><span class="hint">स्थिती</span>
-            <select>
-              <option>सुस्थितीत</option>
-              <option>दुरुस्ती आवश्यक</option>
-              <option>धोकादायक</option>
-            </select>
-          </div>
-          <div><span class="hint">दुरुस्ती रक्कम / निर्लेखन प्रस्ताव</span><input type="text" placeholder="रक्कम / प्रस्ताव दाखल?"></div>
-          <div><span class="hint">Fire Extinguishers</span><select><option>आहे</option><option>नाही</option></select></div>
-        </div>
-
-        <label>२१. शाळेसाठी संरक्षण भिंत बाबत माहिती</label>
-        <div class="row2">
-          <div><span class="hint">प्रकार</span>
-            <select><option>पक्की</option><option>कच्ची</option><option>तार कुंपण</option><option>नाही</option></select>
-          </div>
-          <div><span class="hint">स्थिती</span>
-            <select><option>सुस्थितीत</option><option>अर्धवट</option><option>दुरुस्ती आवश्यक</option><option>धोकादायक</option></select>
+        
+        <div class="sub-card">
+          <h4>१७ व १९. शालेय विद्युतीकरण व सोलर पॅनल</h4>
+          <div class="grid-2-mobile">
+            <div><span class="hint">विद्युत मीटर</span><select id="elecMeter"><option>आहे</option><option>नाही</option></select></div>
+            <div><span class="hint">ग्राहक क्रमांक</span><input type="text" id="elecConsumer"></div>
+            <div><span class="hint">थकीत बिल (₹)</span><input type="number" id="elecDues" min="0"></div>
+            <div><span class="hint">लाईट फिटींग पूर्ण खोल्या</span><input type="number" id="lightDone" min="0"></div>
+            <div><span class="hint">लाईट फिटींग आवश्यक खोल्या</span><input type="number" id="lightReq" min="0"></div>
+            <div><span class="hint">सोलर पॅनल (क्षमता)</span><input type="text" id="solarPanel" placeholder="उदा. नाही / 5 KW"></div>
           </div>
         </div>
 
-        <label>२२. शाळेसाठी क्रीडांगण</label>
-        <div class="row2">
-          <div><span class="hint">उपलब्धता</span><select><option>आहे</option><option>नाही</option></select></div>
-          <div><span class="hint">असल्यास क्षेत्रफळ</span><input type="text" placeholder="उदा. 500 चौ.मी."></div>
+        <div class="sub-card">
+          <h4>१८. अपंगासाठी रॅम्प बाबत माहिती</h4>
+          <select id="rampStatus">
+            <option>सुस्थितीत (रेलींगसह)</option>
+            <option>रेलींग नाही</option>
+            <option>रॅम्प नाही</option>
+          </select>
         </div>
+
+        <div class="sub-card">
+          <h4>२०. किचन शेड बाबत माहिती</h4>
+          <div class="grid-2-mobile">
+            <div><span class="hint">स्थिती</span>
+              <select id="kitchenStatus">
+                <option>सुस्थितीत</option><option>दुरुस्ती आवश्यक</option><option>धोकादायक</option>
+              </select>
+            </div>
+            <div><span class="hint">दुरुस्ती रक्कम / निर्लेखन</span><input type="text" id="kitchenCost" placeholder="रक्कम / प्रस्ताव?"></div>
+            <div><span class="hint">अग्निशमन यंत्र</span><select id="fireExt"><option>आहे</option><option>नाही</option></select></div>
+          </div>
+        </div>
+
+        <div class="sub-card">
+          <h4>२१. शाळेसाठी संरक्षण भिंत</h4>
+          <div class="grid-2">
+            <div><span class="hint">प्रकार</span>
+              <select id="wallType"><option>पक्की</option><option>कच्ची</option><option>तार कुंपण</option><option>नाही</option></select>
+            </div>
+            <div><span class="hint">स्थिती</span>
+              <select id="wallStatus"><option>सुस्थितीत</option><option>अर्धवट</option><option>दुरुस्ती आवश्यक</option><option>धोकादायक</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-card">
+          <h4>२२. शाळेसाठी क्रीडांगण</h4>
+          <div class="grid-2">
+            <div><span class="hint">उपलब्धता</span><select id="playgroundAvail"><option>आहे</option><option>नाही</option></select></div>
+            <div><span class="hint">असल्यास क्षेत्रफळ</span><input type="text" id="playgroundArea" placeholder="उदा. 500 चौ.मी."></div>
+          </div>
+        </div>
+
       </div>
     </details>
 
     <!-- 5. शैक्षणिक, तंत्रज्ञान व इतर सुविधा -->
     <details class="section">
-      <summary>५. शैक्षणिक, तंत्रज्ञान व इतर सुविधा</summary>
+      <summary>५. शैक्षणिक, तंत्रज्ञान व इतर</summary>
       <div class="section-body">
-        <table class="matrix">
-          <thead>
-            <tr><th style="width:50%">सुविधा</th><th>आहे / नाही</th><th>तपशील / संख्या</th></tr>
-          </thead>
-          <tbody>
-            <tr><td class="lbl">२३. संगणक प्रयोगशाळा</td>
-              <td><select><option>आहे</option><option>नाही</option></select></td>
-              <td><input type="number" placeholder="संगणक संख्या"></td>
-            </tr>
-            <tr><td class="lbl">२४. विज्ञान प्रयोगशाळा</td>
-              <td><select><option>आहे</option><option>नाही</option></select></td>
-              <td>-</td>
-            </tr>
-            <tr><td class="lbl">२५. डिजीटल साहित्य</td>
-              <td><select><option>आहे</option><option>नाही</option></select></td>
-              <td><input type="number" placeholder="डिजीटल बोर्ड संख्या"></td>
-            </tr>
-            <tr><td class="lbl">२६. लायब्ररी</td>
-              <td><select><option>आहे</option><option>नाही</option></select></td>
-              <td>-</td>
-            </tr>
-            <tr><td class="lbl">२७. वायफाय सुविधा</td>
-              <td><select><option>आहे</option><option>नाही</option></select></td>
-              <td>-</td>
-            </tr>
-            <tr><td class="lbl">२८. बोलक्या भिंती</td>
-              <td><select><option>आहे</option><option>नाही</option></select></td>
-              <td><input type="number" placeholder="वर्गखोल्या संख्या"></td>
-            </tr>
-            <tr><td class="lbl">२९. परस बाग</td>
-              <td><select><option>आहे</option><option>नाही</option></select></td>
-              <td>-</td>
-            </tr>
-            <tr><td class="lbl">३०. खेळासाठी साहित्य</td>
-              <td><select><option>आहे</option><option>नाही</option></select></td>
-              <td><input type="text" placeholder="साहित्याचे विवरण"></td>
-            </tr>
-          </tbody>
-        </table>
+        
+        <div class="sub-card">
+          <h4>शैक्षणिक व तंत्रज्ञान सुविधा</h4>
+          
+          <div class="grid-2" style="margin-bottom: 12px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+            <div><span class="hint">२३. संगणक प्रयोगशाळा</span><select id="compLabAvail"><option>आहे</option><option>नाही</option></select></div>
+            <div><span class="hint">संगणक संख्या</span><input type="number" id="compLabCount"></div>
+          </div>
+          
+          <div class="field-group">
+            <span class="hint">२४. विज्ञान प्रयोगशाळा</span>
+            <select id="sciLabAvail"><option>आहे</option><option>नाही</option></select>
+          </div>
+          
+          <div class="grid-2" style="margin-bottom: 12px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+            <div><span class="hint">२५. डिजीटल साहित्य</span><select id="digiMatAvail"><option>आहे</option><option>नाही</option></select></div>
+            <div><span class="hint">डिजीटल बोर्ड संख्या</span><input type="number" id="digiMatCount"></div>
+          </div>
+          
+          <div class="grid-2">
+            <div class="field-group">
+              <span class="hint">२६. लायब्ररी</span>
+              <select id="libAvail"><option>आहे</option><option>नाही</option></select>
+            </div>
+            <div class="field-group">
+              <span class="hint">२७. वायफाय सुविधा</span>
+              <select id="wifiAvail"><option>आहे</option><option>नाही</option></select>
+            </div>
+          </div>
 
-        <label>३१. सन 2025-26 मध्ये शिष्यवृत्ती / विविध स्पर्धा परिक्षा बाबत माहिती</label>
-        <div class="row2">
-          <div><span class="hint">सहभाग घेतलेले विद्यार्थी संख्या</span><input type="number" min="0"></div>
-          <div><span class="hint">पात्र विद्यार्थी संख्या</span><input type="number" min="0"></div>
+          <div class="grid-2" style="margin-bottom: 12px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+            <div><span class="hint">२८. बोलक्या भिंती</span><select id="wallPaintAvail"><option>आहे</option><option>नाही</option></select></div>
+            <div><span class="hint">वर्गखोल्या संख्या</span><input type="number" id="wallPaintCount"></div>
+          </div>
+
+          <div class="field-group">
+            <span class="hint">२९. परस बाग</span>
+            <select id="gardenAvail"><option>आहे</option><option>नाही</option></select>
+          </div>
+
+          <div class="grid-2">
+            <div><span class="hint">३०. खेळासाठी साहित्य</span><select id="playMatAvail"><option>आहे</option><option>नाही</option></select></div>
+            <div><span class="hint">साहित्याचे विवरण</span><input type="text" id="playMatDesc"></div>
+          </div>
+
         </div>
 
-        <label>३२. शाळेव्दारे राबविण्यात येणारे विशेष उपक्रम</label>
-        <textarea placeholder="विशेष उपक्रमांची माहिती..."></textarea>
+        <div class="sub-card">
+          <h4>३१. सन 2025-26 शिष्यवृत्ती / स्पर्धा परिक्षा</h4>
+          <div class="grid-2">
+            <div><span class="hint">सहभाग घेतलेले विद्यार्थी</span><input type="number" id="scholPart" min="0"></div>
+            <div><span class="hint">पात्र विद्यार्थी</span><input type="number" id="scholPass" min="0"></div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label>३२. शाळेव्दारे राबविण्यात येणारे विशेष उपक्रम</label>
+          <textarea id="specAct" placeholder="विशेष उपक्रमांची माहिती..."></textarea>
+        </div>
+
       </div>
     </details>
 
@@ -475,25 +509,29 @@
     <details class="section" open>
       <summary>६. स्वाक्षरी व पडताळणी</summary>
       <div class="section-body">
-        <label>३३. भेट देणाऱ्या अधिकारी यांचा अभिप्राय</label>
-        <textarea placeholder="अभिप्राय नोंदवा..."></textarea>
-        <div class="row3" style="margin-top:15px;">
-          <div><span class="hint">दिनांक</span><input type="date" required></div>
-          <div><span class="hint">अधिकाऱ्याचे नाव</span><input type="text" required></div>
-          <div><span class="hint">हुद्दा</span><input type="text" required></div>
+        <div class="field-group">
+          <label>३३. भेट देणाऱ्या अधिकारी यांचा अभिप्राय</label>
+          <textarea id="officerFeedback" placeholder="अभिप्राय नोंदवा..."></textarea>
+        </div>
+        
+        <div class="grid-2-mobile">
+          <div class="field-group"><span class="hint">दिनांक</span><input type="date" id="visitDate" required></div>
+          <div class="field-group"><span class="hint">अधिकाऱ्याचे नाव</span><input type="text" id="officerName" required></div>
+          <div class="field-group"><span class="hint">हुद्दा</span><input type="text" id="officerDesignation" required></div>
         </div>
       </div>
     </details>
 
     <div class="toolbar">
-      <button type="submit">🖨️ प्रिंट करा</button>
-      <button type="button" class="excel-btn" onclick="exportToExcel()">📊 Excel डाउनलोड</button>
-      <button type="button" class="online-btn" id="onlineSubmitBtn" onclick="submitOnline()">☁️ ऑनलाईन सबमिट करा</button>
+      <button type="submit" class="print-btn">🖨️ प्रिंट</button>
+      <button type="button" class="excel-btn" onclick="exportToExcel()">📊 Excel</button>
+      <button type="button" class="online-btn" id="onlineSubmitBtn" onclick="submitOnline()">☁️ सबमिट</button>
     </div>
   </form>
 </main>
 
 <script>
+// Data
 const SCHOOLS = [
   {name:"सी.पी.एस. रविवार पेठ", udise:"27270101612"},
   {name:"जि.प.प्रा.शा. क्र. २, अंबाजोगाई", udise:"27270101613"},
@@ -569,7 +607,6 @@ const TEACHERS_DATA = {
   "जि.प.प्रा.शा. गिरवली आपेट": [ "अर्जुन सूर्यकांत चव्हाण", "सुनिल आनंदराव फुलेवार" ]
 };
 
-// Ensure all details sections remain OPEN before printing to avoid hidden data
 window.onbeforeprint = function() {
   document.querySelectorAll('details').forEach(el => el.setAttribute('open', ''));
 };
@@ -607,7 +644,6 @@ function calcTotalStudents() {
 }
 
 function getFormDataObj() {
-  let payload = {};
   const val = (id) => document.getElementById(id) ? document.getElementById(id).value : "";
   const textVal = (id) => {
     const el = document.getElementById(id);
@@ -616,59 +652,100 @@ function getFormDataObj() {
     return el.value;
   };
 
-  payload["शाळेचे नाव"] = textVal("schoolSelect");
-  payload["युडायस (U-DISE) नंबर"] = val("udise");
-  payload["शाळेचा प्रकार"] = textVal("schoolType");
-  payload["शाळेच्या जागेची मालकी"] = val("landOwnership");
-  payload["मुख्याध्यापक यांचे नाव"] = val("hmName");
-  payload["मुख्याध्यापकांचा मोबाईल क्रमांक"] = val("hmMobile");
-  payload["पीएमश्री / आदर्श योजना"] = textVal("isPmShri");
-  payload["योजनेचे नाव"] = val("pmShriName");
-  payload["विद्यार्थी संख्या (मुले)"] = val("stuBoys");
-  payload["विद्यार्थी संख्या (मुली)"] = val("stuGirls");
-  payload["विद्यार्थी संख्या (एकूण)"] = val("stuTotal");
-  payload["शिक्षक (मान्य पदे)"] = val("teacherSanctioned");
-  payload["शिक्षक (कार्यरत पदे)"] = val("teacherWorking");
+  let payload = {
+    "शाळेचे नाव": textVal("schoolSelect"),
+    "युडायस (U-DISE) नंबर": val("udise"),
+    "शाळेचा प्रकार": textVal("schoolType"),
+    "शाळेच्या जागेची मालकी": val("landOwnership"),
+    "मुख्याध्यापक यांचे नाव": val("hmName"),
+    "मुख्याध्यापकांचा मोबाईल क्रमांक": val("hmMobile"),
+    "पीएमश्री / आदर्श योजना": textVal("isPmShri"),
+    "योजनेचे नाव": val("pmShriName"),
+    "विद्यार्थी संख्या (मुले)": val("stuBoys"),
+    "विद्यार्थी संख्या (मुली)": val("stuGirls"),
+    "विद्यार्थी संख्या (एकूण)": val("stuTotal"),
+    "शिक्षक (मान्य पदे)": val("teacherSanctioned"),
+    "शिक्षक (कार्यरत पदे)": val("teacherWorking"),
+    
+    "वर्गखोल्या (सुस्थितीत)": val("classGood"),
+    "वर्गखोल्या (दुरुस्ती आवश्यक)": val("classRepair"),
+    "वर्गखोल्या (धोकादायक)": val("classDanger"),
+    "दुरुस्ती आवश्यक रक्कम (₹)": val("classRepairCost"),
+    "वर्गखोल्या निर्लेखन प्रस्ताव": textVal("classWriteoff"),
+    "नवीन आवश्यक वर्गखोल्या": val("classNewReq"),
 
-  const sections = document.querySelectorAll('details.section');
-  for (let i = 1; i < sections.length; i++) {
-    const sec = sections[i];
-    const inputs = sec.querySelectorAll('input, select, textarea');
-    inputs.forEach((input) => {
-      let labelText = input.placeholder || "माहिती";
-      let prev = input.previousElementSibling;
-      if (prev && (prev.tagName === 'LABEL' || prev.className.includes('hint') || prev.className.includes('lbl'))) {
-        labelText = prev.innerText;
-      } else {
-        let parentDiv = input.closest('div');
-        if (parentDiv && parentDiv.parentElement) {
-          let label = parentDiv.parentElement.querySelector('label');
-          if (label) {
-            let hint = parentDiv.querySelector('.hint');
-            labelText = label.innerText + (hint ? (" - " + hint.innerText) : "");
-          }
-        }
-      }
-      let td = input.closest('td');
-      if (td) {
-        let tr = td.closest('tr');
-        let table = td.closest('table');
-        if (table && tr) {
-          let rowLabelEl = tr.querySelector('.lbl');
-          let rowLabel = rowLabelEl ? rowLabelEl.innerText : "";
-          let colHeader = table.rows[0].cells[td.cellIndex]?.innerText || "";
-          labelText = rowLabel ? (rowLabel + " -> " + colHeader) : colHeader;
-        }
-      }
-      let value = (input.tagName === 'SELECT' && input.selectedIndex >= 0) ? input.options[input.selectedIndex].text : input.value;
-      
-      if(!payload[labelText]) {
-          payload[labelText] = value;
-      } else {
-          payload[labelText + " (" + Math.random().toString(36).substring(7) + ")"] = value;
-      }
-    });
-  }
+    "मुलींसाठी स्वच्छतागृह (एकूण)": val("toiletGirlTotal"),
+    "मुलींसाठी स्वच्छतागृह (वापरात)": val("toiletGirlUse"),
+    "मुलींसाठी स्वच्छतागृह (नादुरुस्त)": val("toiletGirlBad"),
+    "मुलींसाठी स्वच्छतागृह (धोकादायक)": val("toiletGirlDanger"),
+    "मुलींसाठी स्वच्छतागृह (निर्लेखन)": textVal("toiletGirlWriteoff"),
+
+    "मुलींसाठी मुतारी (एकूण)": val("urinalGirlTotal"),
+    "मुलींसाठी मुतारी (वापरात)": val("urinalGirlUse"),
+    "मुलींसाठी मुतारी (नादुरुस्त)": val("urinalGirlBad"),
+    "मुलींसाठी मुतारी (धोकादायक)": val("urinalGirlDanger"),
+    "मुलींसाठी मुतारी (निर्लेखन)": textVal("urinalGirlWriteoff"),
+
+    "मुलांसाठी स्वच्छतागृह (एकूण)": val("toiletBoyTotal"),
+    "मुलांसाठी स्वच्छतागृह (वापरात)": val("toiletBoyUse"),
+    "मुलांसाठी स्वच्छतागृह (नादुरुस्त)": val("toiletBoyBad"),
+    "मुलांसाठी स्वच्छतागृह (धोकादायक)": val("toiletBoyDanger"),
+    "मुलांसाठी स्वच्छतागृह (निर्लेखन)": textVal("toiletBoyWriteoff"),
+
+    "मुलांसाठी मुतारी (एकूण)": val("urinalBoyTotal"),
+    "मुलांसाठी मुतारी (वापरात)": val("urinalBoyUse"),
+    "मुलांसाठी मुतारी (नादुरुस्त)": val("urinalBoyBad"),
+    "मुलांसाठी मुतारी (धोकादायक)": val("urinalBoyDanger"),
+    "मुलांसाठी मुतारी (निर्लेखन)": textVal("urinalBoyWriteoff"),
+
+    "दिव्यांगासाठी स्वच्छतागृह (एकूण)": val("toiletCwsnTotal"),
+    "दिव्यांगासाठी स्वच्छतागृह (वापरात)": val("toiletCwsnUse"),
+    "दिव्यांगासाठी स्वच्छतागृह (नादुरुस्त)": val("toiletCwsnBad"),
+    "दिव्यांगासाठी स्वच्छतागृह (धोकादायक)": val("toiletCwsnDanger"),
+    "दिव्यांगासाठी स्वच्छतागृह (निर्लेखन)": textVal("toiletCwsnWriteoff"),
+
+    "कमोड चेअर व्यवस्था": textVal("cwsnCommode"),
+    "स्वच्छतागृहासाठी पाणी": textVal("toiletWater"),
+    "पिण्याच्या पाण्याची व्यवस्था": textVal("drinkWater"),
+    "वॉटर फिल्टर": textVal("waterFilter"),
+
+    "विद्युत मीटर": textVal("elecMeter"),
+    "ग्राहक क्रमांक": val("elecConsumer"),
+    "विद्युत बिल थकीत रक्कम (₹)": val("elecDues"),
+    "लाईट फिटींग पूर्ण खोल्या": val("lightDone"),
+    "लाईट फिटींग आवश्यक खोल्या": val("lightReq"),
+    "सोलर पॅनल": val("solarPanel"),
+    
+    "रॅम्प स्थिती": textVal("rampStatus"),
+    
+    "किचन शेड स्थिती": textVal("kitchenStatus"),
+    "किचन शेड दुरुस्ती रक्कम/प्रस्ताव": val("kitchenCost"),
+    "अग्निशमन यंत्र": textVal("fireExt"),
+    
+    "संरक्षण भिंत प्रकार": textVal("wallType"),
+    "संरक्षण भिंत स्थिती": textVal("wallStatus"),
+    
+    "क्रीडांगण उपलब्धता": textVal("playgroundAvail"),
+    "क्रीडांगण क्षेत्रफळ": val("playgroundArea"),
+
+    "संगणक प्रयोगशाळा": textVal("compLabAvail") + (val("compLabCount") ? (" - संख्या: " + val("compLabCount")) : ""),
+    "विज्ञान प्रयोगशाळा": textVal("sciLabAvail"),
+    "डिजीटल साहित्य": textVal("digiMatAvail") + (val("digiMatCount") ? (" - संख्या: " + val("digiMatCount")) : ""),
+    "लायब्ररी": textVal("libAvail"),
+    "वायफाय सुविधा": textVal("wifiAvail"),
+    "बोलक्या भिंती": textVal("wallPaintAvail") + (val("wallPaintCount") ? (" - संख्या: " + val("wallPaintCount")) : ""),
+    "परस बाग": textVal("gardenAvail"),
+    "खेळासाठी साहित्य": textVal("playMatAvail") + (val("playMatDesc") ? (" - विवरण: " + val("playMatDesc")) : ""),
+
+    "शिष्यवृत्ती सहभाग विद्यार्थी": val("scholPart"),
+    "शिष्यवृत्ती पात्र विद्यार्थी": val("scholPass"),
+    
+    "विशेष उपक्रम": val("specAct"),
+    "अभिप्राय": val("officerFeedback"),
+    "भेट दिनांक": val("visitDate"),
+    "अधिकाऱ्याचे नाव": val("officerName"),
+    "हुद्दा": val("officerDesignation")
+  };
   return payload;
 }
 
@@ -699,7 +776,6 @@ function exportToExcel() {
 /* ============================================================
    ONLINE DATA SUBMISSION (GOOGLE APPS SCRIPT)
    ============================================================ */
-// WEB APP URL INTEGRATED HERE
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxiHlIKs8U5jGgSFqN0ZokOAymG4LuSwgDRM1CiFm4QI5hcRMZeEFlgwjDryl-JsFI/exec"; 
 
 function submitOnline() {
@@ -710,7 +786,7 @@ function submitOnline() {
   }
 
   const btn = document.getElementById("onlineSubmitBtn");
-  btn.innerText = "⏳ पाठवत आहे... (Sending...)";
+  btn.innerText = "⏳ पाठवत आहे...";
   btn.disabled = true;
 
   const payload = getFormDataObj();
@@ -722,12 +798,12 @@ function submitOnline() {
     body: JSON.stringify(payload)
   }).then(() => {
     alert("माहिती यशस्वीरित्या ऑनलाईन सबमिट झाली! (Data submitted successfully!)");
-    btn.innerText = "☁️ ऑनलाईन सबमिट करा";
+    btn.innerText = "☁️ सबमिट";
     btn.disabled = false;
   }).catch((error) => {
     alert("तांत्रिक अडचण! कृपया पुन्हा प्रयत्न करा. (Error submitting data)");
     console.error("Error:", error);
-    btn.innerText = "☁️ ऑनलाईन सबमिट करा";
+    btn.innerText = "☁️ सबमिट";
     btn.disabled = false;
   });
 }
