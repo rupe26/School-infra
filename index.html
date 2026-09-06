@@ -121,10 +121,7 @@
     <button type="button" id="resetPinBtn" onclick="resetAdminPin()" style="width:100%; background:#d93025; margin-top:10px;">🔄 PIN अपडेट करा</button>
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
-    
-    <!-- NEW LOG OUT BUTTON -->
     <button type="button" onclick="logoutAdmin()" style="width:100%; background:#f29900; color:#fff; border:none; margin-bottom:10px;">🚪 लॉग आउट (Log Out)</button>
-    
     <button type="button" onclick="closeAdminModal()" style="width:100%; background:#777;">❌ बंद करा</button>
   </div>
 </div>
@@ -435,12 +432,10 @@ function openAdminFlow() {
 function closePinModal() { document.getElementById('pinModal').style.display = 'none'; }
 function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
 
-// नवीन: लॉग आउट फंक्शन
 function logoutAdmin() {
   isAdminLoggedIn = false;
   closeAdminModal();
   
-  // जर एखादी शाळा निवडली असेल तर फॉर्म पुन्हा लॉक करा
   if(document.getElementById("schoolSelect").value !== "") {
     applyLockState(true);
     const statusEl = document.getElementById("fetchStatus");
@@ -530,6 +525,49 @@ function applyDefaultOfficer() {
   if(d && !document.getElementById('officerDesignation').value) document.getElementById('officerDesignation').value = d;
 }
 
+// ---------------- दिनांक व गणना हेल्पर्स ---------------- //
+// Google Sheet मधील कोणत्याही फॉरमॅटमधील तारीख YYYY-MM-DD मध्ये रूपांतरित करणे
+function formatDateForInput(val) {
+  if (!val) return "";
+  let str = String(val).trim();
+  
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  if (str.includes("T")) {
+    let part = str.split("T")[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(part)) return part;
+  }
+  let dmy = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+  if (dmy) {
+    return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`;
+  }
+  let d = new Date(str);
+  if (!isNaN(d.getTime())) {
+    let y = d.getFullYear();
+    let m = String(d.getMonth() + 1).padStart(2, '0');
+    let day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  return "";
+}
+
+function setTodayDateIfEmpty() {
+  const visitDateEl = document.getElementById("visitDate");
+  if (visitDateEl && !visitDateEl.value) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    visitDateEl.value = `${yyyy}-${mm}-${dd}`;
+  }
+}
+
+function calcTotalStudents() {
+  const boys = parseInt(document.getElementById("stuBoys").value) || 0;
+  const girls = parseInt(document.getElementById("stuGirls").value) || 0;
+  const totEl = document.getElementById("stuTotal");
+  if (totEl) totEl.value = boys + girls;
+}
+
 // ---------------- Form Lock/Unlock Logic ---------------- //
 function applyLockState(isLocked) {
   const elements = document.querySelectorAll('#infraForm input:not(#otherSchoolName), #infraForm select:not(#schoolSelect), #infraForm textarea');
@@ -539,6 +577,7 @@ function applyLockState(isLocked) {
   submitBtn.disabled = isLocked;
   submitBtn.style.opacity = isLocked ? "0.5" : "1";
   
+  calcTotalStudents(); // लॉक असले तरी एकूण विद्यार्थी मोजावेत
   if (!isLocked) triggerAllDependencies(); 
 }
 
@@ -558,6 +597,8 @@ function resetFormFields() {
     else el.value = "";
   });
   applyDefaultOfficer();
+  setTodayDateIfEmpty();
+  calcTotalStudents();
   triggerAllDependencies();
 }
 
@@ -565,6 +606,7 @@ function populateFormData(row) {
   const FIELD_MAP = {
     "शाळेचा प्रकार": "schoolType", "शाळेच्या जागेची मालकी": "landOwnership", "मुख्याध्यापक यांचे नाव": "hmName", "मुख्याध्यापकांचा मोबाईल क्रमांक": "hmMobile",
     "पीएमश्री / आदर्श योजना": "isPmShri", "योजनेचे नाव": "pmShriName", "विद्यार्थी संख्या (मुले)": "stuBoys", "विद्यार्थी संख्या (मुली)": "stuGirls",
+    "विद्यार्थी संख्या (एकूण)": "stuTotal",
     "शिक्षक (मान्य पदे)": "teacherSanctioned", "शिक्षक (कार्यरत पदे)": "teacherWorking", "वर्गखोल्या (सुस्थितीत)": "classGood", "वर्गखोल्या (दुरुस्ती आवश्यक)": "classRepair",
     "वर्गखोल्या (धोकादायक)": "classDanger", "दुरुस्ती आवश्यक रक्कम (₹)": "classRepairCost", "वर्गखोल्या निर्लेखन प्रस्ताव": "classWriteoff", "नवीन आवश्यक वर्गखोल्या": "classNewReq",
     "मुलींसाठी स्वच्छतागृह (एकूण)": "toiletGirlTotal", "मुलींसाठी स्वच्छतागृह (वापरात)": "toiletGirlUse", "मुलींसाठी स्वच्छतागृह (नादुरुस्त)": "toiletGirlBad",
@@ -582,7 +624,7 @@ function populateFormData(row) {
     "सोलर पॅनल": "solarPanel", "रॅम्प स्थिती": "rampStatus", "किचन शेड स्थिती": "kitchenStatus", "किचन शेड दुरुस्ती रक्कम/प्रस्ताव": "kitchenCost", "अग्निशमन यंत्र": "fireExt",
     "संरक्षण भिंत प्रकार": "wallType", "संरक्षण भिंत स्थिती": "wallStatus", "क्रीडांगण उपलब्धता": "playgroundAvail", "क्रीडांगण क्षेत्रफळ": "playgroundArea",
     "विज्ञान प्रयोगशाळा": "sciLabAvail", "लायब्ररी": "libAvail", "वायफाय सुविधा": "wifiAvail", "परस बाग": "gardenAvail", "शिष्यवृत्ती सहभाग विद्यार्थी": "scholPart",
-    "शिष्यवृत्ती पात्र विद्यार्थी": "scholPass", "विशेष उपक्रम": "specAct", "अभिप्राय": "officerFeedback", "भेट दिनांक": "visitDate", "अधिकाऱ्याचे नाव": "officerName", "हुद्दा": "officerDesignation"
+    "शिष्यवृत्ती पात्र विद्यार्थी": "scholPass", "विशेष उपक्रम": "specAct", "अभिप्राय": "officerFeedback", "अधिकाऱ्याचे नाव": "officerName", "हुद्दा": "officerDesignation"
   };
 
   for (const [key, elementId] of Object.entries(FIELD_MAP)) {
@@ -591,6 +633,18 @@ function populateFormData(row) {
       if (el) el.value = row[key];
     }
   }
+
+  // दिनांक अचूक फॉरमॅट करून लोड करणे
+  const rawDate = row["भेट दिनांक"] || row["दिनांक"];
+  if (rawDate) {
+    const formatted = formatDateForInput(rawDate);
+    if (formatted) document.getElementById("visitDate").value = formatted;
+  } else {
+    setTodayDateIfEmpty();
+  }
+
+  // विद्यार्थी संख्या बेरीज लोड करणे
+  calcTotalStudents();
 
   if (row["संगणक प्रयोगशाळा"]) {
     const t = String(row["संगणक प्रयोगशाळा"]);
@@ -658,11 +712,13 @@ async function checkAndFetchSchoolData(schoolName, udise) {
     statusEl.style.color = "#c5221f";
     statusEl.innerText = "⚠️ डेटा सिंक एरर! थेट माहिती भरा.";
     applyLockState(false);
+    setTodayDateIfEmpty();
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   applyDefaultOfficer();
+  setTodayDateIfEmpty();
 
   const schoolSelect = document.getElementById("schoolSelect");
   schoolSelect.innerHTML = '<option value="">-- शाळा निवडा --</option>';
@@ -729,12 +785,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
-function calcTotalStudents() {
-  const boys = parseInt(document.getElementById("stuBoys").value) || 0;
-  const girls = parseInt(document.getElementById("stuGirls").value) || 0;
-  document.getElementById("stuTotal").value = boys + girls;
-}
 
 function getFormDataObj() {
   const val = id => document.getElementById(id) ? document.getElementById(id).value : "";
@@ -812,7 +862,6 @@ function fetchAndExportCombinedExcel() {
     }).catch(e => { alert("अडचण आली."); btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड"; btn.disabled = false; });
 }
 
-// --- सर्व शाळांचा एकत्रित PDF (Full working code from previous iterations) ---
 function fetchAndExportCombinedPDF() {
   const btn = document.getElementById("fetchPdfBtn");
   btn.innerText = "⏳ PDF तयार करत आहे...";
