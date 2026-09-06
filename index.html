@@ -197,6 +197,8 @@
 <main>
   <form id="infraForm" onsubmit="event.preventDefault();">
     
+    <!-- उर्वरित सर्व HTML फॉर्म जसाच्या तसा आहे (कोणताही बदल नाही) -->
+    
     <details class="section" open>
       <summary>१. शाळा, विद्यार्थी व कर्मचारी</summary>
       <div class="section-body">
@@ -492,7 +494,7 @@
           </div>
 
           <div class="grid-2">
-            <div><span class="hint">३०. खेळासाठी साहित्य</span><select id="playMatAvail"><option>आहे</option><option>नाही</option></select></div>
+            <div><span class="hint">३0. खेळासाठी साहित्य</span><select id="playMatAvail"><option>आहे</option><option>नाही</option></select></div>
             <div><span class="hint">साहित्याचे विवरण</span><input type="text" id="playMatDesc"></div>
           </div>
 
@@ -615,7 +617,6 @@ const TEACHERS_DATA = {
 
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxiHlIKs8U5jGgSFqN0ZokOAymG4LuSwgDRM1CiFm4QI5hcRMZeEFlgwjDryl-JsFI/exec"; 
 
-// --- Admin Settings Logic ---
 function openAdminModal() {
   document.getElementById('adminModal').style.display = 'flex';
   document.getElementById('adminOffName').value = localStorage.getItem('defaultOfficerName') || '';
@@ -870,7 +871,7 @@ function fetchAndExportCombinedExcel() {
     });
 }
 
-// --- नवीन: सर्व ३३ प्रश्न, ८२ कॉलम्स आणि "प्रत्येक पानावर ५ शाळा" (Chunking logic) ---
+// --- नवीन: सर्व ३३ प्रश्न २ टेबल्समध्ये विभागलेले (एकाच पानावर ५ शाळा) ---
 function fetchAndExportCombinedPDF() {
   const btn = document.getElementById("fetchPdfBtn");
   btn.innerText = "⏳ PDF तयार करत आहे...";
@@ -886,7 +887,8 @@ function fetchAndExportCombinedPDF() {
         return;
       }
 
-      const sections = [
+      // भाग १ (पहिले ३ विभाग)
+      const sectionsPart1 = [
         {
           title: "१. शाळा, विद्यार्थी व कर्मचारी",
           keys: ["शाळेचे नाव", "युडायस (U-DISE) नंबर", "शाळेचा प्रकार", "शाळेच्या जागेची मालकी", "मुख्याध्यापक यांचे नाव", "मुख्याध्यापकांचा मोबाईल क्रमांक", "पीएमश्री / आदर्श योजना", "योजनेचे नाव", "विद्यार्थी संख्या (मुले)", "विद्यार्थी संख्या (मुली)", "विद्यार्थी संख्या (एकूण)", "शिक्षक (मान्य पदे)", "शिक्षक (कार्यरत पदे)"]
@@ -898,6 +900,14 @@ function fetchAndExportCombinedPDF() {
         {
           title: "३. स्वच्छतागृह (WASH) व पाणी",
           keys: ["मुलींसाठी स्वच्छतागृह (एकूण)", "मुलींसाठी स्वच्छतागृह (वापरात)", "मुलींसाठी स्वच्छतागृह (नादुरुस्त)", "मुलींसाठी स्वच्छतागृह (धोकादायक)", "मुलींसाठी स्वच्छतागृह (आवश्यक)", "मुलींसाठी स्वच्छतागृह (निर्लेखन)", "मुलींसाठी मुतारी (एकूण)", "मुलींसाठी मुतारी (वापरात)", "मुलींसाठी मुतारी (नादुरुस्त)", "मुलींसाठी मुतारी (धोकादायक)", "मुलींसाठी मुतारी (आवश्यक)", "मुलींसाठी मुतारी (निर्लेखन)", "मुलांसाठी स्वच्छतागृह (एकूण)", "मुलांसाठी स्वच्छतागृह (वापरात)", "मुलांसाठी स्वच्छतागृह (नादुरुस्त)", "मुलांसाठी स्वच्छतागृह (धोकादायक)", "मुलांसाठी स्वच्छतागृह (आवश्यक)", "मुलांसाठी स्वच्छतागृह (निर्लेखन)", "मुलांसाठी मुतारी (एकूण)", "मुलांसाठी मुतारी (वापरात)", "मुलांसाठी मुतारी (नादुरुस्त)", "मुलांसाठी मुतारी (धोकादायक)", "मुलांसाठी मुतारी (आवश्यक)", "मुलांसाठी मुतारी (निर्लेखन)", "दिव्यांगासाठी स्वच्छतागृह (एकूण)", "दिव्यांगासाठी स्वच्छतागृह (वापरात)", "दिव्यांगासाठी स्वच्छतागृह (नादुरुस्त)", "दिव्यांगासाठी स्वच्छतागृह (धोकादायक)", "दिव्यांगासाठी स्वच्छतागृह (आवश्यक)", "दिव्यांगासाठी स्वच्छतागृह (निर्लेखन)", "स्वच्छतागृहासाठी पाणी", "कमोड चेअर व्यवस्था", "पिण्याच्या पाण्याची व्यवस्था", "वॉटर फिल्टर"]
+        }
+      ];
+
+      // भाग २ (उर्वरित ३ विभाग) - ओळख पटण्यासाठी 'शाळेचे नाव' सोबत ठेवले आहे
+      const sectionsPart2 = [
+        {
+          title: "शाळेची ओळख",
+          keys: ["शाळेचे नाव"] 
         },
         {
           title: "४. वीज व सुविधा",
@@ -934,26 +944,21 @@ function fetchAndExportCombinedPDF() {
                 .replace("नवीन आवश्यक", "नवीन आव.");
       }
 
-      // प्रत्येक पानावरील सारणीचे हेडर (एकदाच बनवून ठेवणे)
-      const headersHtml = `
-        <tr>
-          ${sections.map(s => `<th class="main-th" colspan="${s.keys.length}">${s.title}</th>`).join('')}
-        </tr>
-        <tr>
-          ${sections.map(s => s.keys.map(k => {
-             let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
-             return `<th class="sub-th"><div class="${isText ? 'text-header' : 'vert'}">${getShortHeader(k)}</div></th>`;
-          }).join('')).join('')}
-        </tr>
-      `;
+      // टेबल बनवणारे फंक्शन
+      function generateTable(sections, chunkData) {
+        const headersHtml = `
+          <tr>
+            ${sections.map(s => `<th class="main-th" colspan="${s.keys.length}">${s.title}</th>`).join('')}
+          </tr>
+          <tr>
+            ${sections.map(s => s.keys.map(k => {
+               let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
+               return `<th class="sub-th"><div class="${isText ? 'text-header' : 'vert'}">${getShortHeader(k)}</div></th>`;
+            }).join('')).join('')}
+          </tr>
+        `;
 
-      // डेटा ५-५ शाळांच्या गटात (Chunks) विभागणे
-      let pagesHtml = "";
-      for (let i = 0; i < data.length; i += 5) {
-        let chunk = data.slice(i, i + 5);
-        let pageNumber = Math.floor(i / 5) + 1;
-        
-        let rowsHtml = chunk.map(row => `
+        const rowsHtml = chunkData.map(row => `
           <tr>
             ${sections.map(s => s.keys.map(k => {
                let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
@@ -963,14 +968,24 @@ function fetchAndExportCombinedPDF() {
           </tr>
         `).join('');
 
-        // .page क्लास मुळे प्रत्येक टेबल नंतर नवीन पान येईल
+        return `<table><thead>${headersHtml}</thead><tbody>${rowsHtml}</tbody></table>`;
+      }
+
+      // डेटा ५-५ शाळांच्या गटात (Chunks) विभागणे
+      let pagesHtml = "";
+      for (let i = 0; i < data.length; i += 5) {
+        let chunk = data.slice(i, i + 5);
+        let pageNumber = Math.floor(i / 5) + 1;
+        
         pagesHtml += `
           <div class="page">
-            <h2>शाळांची भौतिक सुविधा माहिती - एकत्रित अहवाल (पान ${pageNumber})</h2>
-            <table>
-              <thead>${headersHtml}</thead>
-              <tbody>${rowsHtml}</tbody>
-            </table>
+            <h2>शाळांची भौतिक सुविधा माहिती - भाग १ (पान ${pageNumber})</h2>
+            ${generateTable(sectionsPart1, chunk)}
+            
+            <div class="table-gap"></div>
+
+            <h2>शाळांची भौतिक सुविधा माहिती - भाग २ (पान ${pageNumber})</h2>
+            ${generateTable(sectionsPart2, chunk)}
           </div>
         `;
       }
@@ -986,26 +1001,28 @@ function fetchAndExportCombinedPDF() {
             
             @page { size: A4 landscape; margin: 6mm; }
             body { font-family: 'Mukta', sans-serif; color: #000; background: #fff; margin: 0; padding: 0; }
-            h2 { text-align: center; font-size: 12pt; margin: 0 0 10px 0; color: #1c2b4a; }
+            h2 { text-align: center; font-size: 11pt; margin: 0 0 6px 0; color: #1c2b4a; }
             
-            /* Page Break Logic */
-            .page { page-break-after: always; width: 100%; box-sizing: border-box; margin-bottom: 20px; }
-            .page:last-child { page-break-after: auto; margin-bottom: 0; }
+            .page { page-break-after: always; width: 100%; box-sizing: border-box; }
+            .page:last-child { page-break-after: auto; }
             
-            table { width: 100%; border-collapse: collapse; table-layout: auto; }
-            th, td { border: 0.5px solid #222; padding: 1.5px; text-align: center; vertical-align: middle; word-wrap: break-word; }
+            table { width: 100%; border-collapse: collapse; table-layout: auto; margin-bottom: 5px; }
+            th, td { border: 0.5px solid #222; padding: 2px; text-align: center; vertical-align: middle; word-wrap: break-word; }
             th { background-color: #f0f0f0; color: #000; }
-            .main-th { font-size: 7pt; font-weight: 700; padding: 3px; border-bottom: 1.5px solid #000; }
-            .sub-th { height: 95px; }
             
-            .vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; font-size: 5.5pt; max-height: 85px; }
-            .text-header { font-size: 5.5pt; font-weight: 700; max-width: 45px; text-align: center; white-space: normal; }
+            .main-th { font-size: 8pt; font-weight: 700; padding: 3px; border-bottom: 1.5px solid #000; }
+            .sub-th { height: 90px; }
             
-            .text-cell { text-align: left; font-size: 5.5pt; max-width: 70px; line-height: 1.2; }
-            .num-cell { text-align: center; font-size: 6pt; font-weight: 600; min-width: 12px; }
+            .vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; font-size: 6pt; max-height: 85px; }
+            .text-header { font-size: 6.5pt; font-weight: 700; max-width: 60px; text-align: center; white-space: normal; }
             
-            /* समान उंची मिळवण्यासाठी */
-            tbody tr td { min-height: 25px; height: 35px; } 
+            .text-cell { text-align: left; font-size: 6.5pt; max-width: 80px; line-height: 1.2; }
+            .num-cell { text-align: center; font-size: 7pt; font-weight: 600; min-width: 14px; }
+            
+            tbody tr td { min-height: 25px; height: 30px; } 
+            
+            /* दोन टेबल्स मधील अंतर */
+            .table-gap { height: 15px; } 
           </style>
         </head>
         <body>
