@@ -165,7 +165,7 @@
 <body>
 
 <header class="topbar">
-  <div style="width: 24px;"></div> <!-- Spacer for center alignment -->
+  <div style="width: 24px;"></div>
   <h1>शाळांची भौतिक सुविधा माहिती</h1>
   <button class="admin-icon" onclick="openAdminModal()" title="Admin Settings">⚙️</button>
 </header>
@@ -489,7 +489,7 @@
           </div>
 
           <div class="field-group">
-            <span class="hint">२९. परस बाग</span>
+            <span class="hint">२९. پرस बाग</span>
             <select id="gardenAvail"><option>आहे</option><option>नाही</option></select>
           </div>
 
@@ -608,7 +608,7 @@ const TEACHERS_DATA = {
   "जि.प.प्रा.शा. पिंपळा धायगुडा (मराठी)": [ "भैय्यासाहेब तुकाराम जोगदंड", "प्रीती सुभाषचंद्र साहू", "संजीव कचरू उमाप", "गंगू मुरलीधर झाडे", "सुरेखा उमाकांत हिशोबे", "ज्योतीराम कोंडीबा कोल्हापुरे", "सीमा सखारामराव कदम", "विलास रामराव माचवे" ],
   "जि.प.प्रा.शा. पिंपळा धायगुडा (उर्दू)": [ "सय्यदा हिना सय्यद सरफराजोद्दीन", "दायमी सय्यदा नुरुलहुदा अमीरोद्दीन", "खालीद हसनसाब सय्यद", "गौसिया बेगम अब्दुल अजीज शेख" ],
   "जि.प.प्रा.शा. वरवटी": [ "ज्योतीबाई देवीदासराव शिंदे", "श्री सायस साखरोबा गर्जे" ],
-  "जि.प.प्रा.शा. उघडे वस्ती (वरवटी)": [ "रविकांत सुधाकरराव বাধकर", "शोभा अंगदराव चाटे" ],
+  "जि.प.प्रा.शा. उघडे वस्ती (वरवटी)": [ "रविकांत सुधाकरराव खेपकर", "शोभा अंगदराव चाटे" ],
   "जि.प.प्रा.शा. तलाव पाटी": [ "मनीषा धोंडोपंत चिंचोलीकर", "श्रीदेवी मनोहर सिरसाट" ],
   "जि.प.प्रा.शा. अंबलवाडी": [ "नवतीला रामराव जाधव", "भगवान आश्रुबा बिल्पे", "आनंद पांडुरंग सिरसाट", "रुक्मिणी हरिश्चंद्र दाभाडे" ],
   "जि. प. प्रा.शा. गोल्टावस्ती": [ "सुरेखा अभिमान गालफाडे", "शालन नागनाथ जोगदंड" ],
@@ -646,7 +646,7 @@ function applyDefaultOfficer() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  applyDefaultOfficer(); // Apply default officer on load
+  applyDefaultOfficer();
 
   const schoolSelect = document.getElementById("schoolSelect");
   schoolSelect.innerHTML = '<option value="">-- शाळा निवडा --</option>';
@@ -694,7 +694,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Dependent Inputs Block Logic 
   const dependencies = [
     { select: "isPmShri", input: "pmShriName", condition: (val) => val === "आहे" },
     { select: "elecMeter", input: "elecConsumer", condition: (val) => val === "आहे" },
@@ -761,74 +760,60 @@ function getFormDataObj() {
     "विद्यार्थी संख्या (एकूण)": val("stuTotal"),
     "शिक्षक (मान्य पदे)": val("teacherSanctioned"),
     "शिक्षक (कार्यरत पदे)": val("teacherWorking"),
-    
     "वर्गखोल्या (सुस्थितीत)": val("classGood"),
     "वर्गखोल्या (दुरुस्ती आवश्यक)": val("classRepair"),
     "वर्गखोल्या (धोकादायक)": val("classDanger"),
     "दुरुस्ती आवश्यक रक्कम (₹)": val("classRepairCost"),
     "वर्गखोल्या निर्लेखन प्रस्ताव": textVal("classWriteoff"),
     "नवीन आवश्यक वर्गखोल्या": val("classNewReq"),
-
     "मुलींसाठी स्वच्छतागृह (एकूण)": val("toiletGirlTotal"),
     "मुलींसाठी स्वच्छतागृह (वापरात)": val("toiletGirlUse"),
     "मुलींसाठी स्वच्छतागृह (नादुरुस्त)": val("toiletGirlBad"),
     "मुलींसाठी स्वच्छतागृह (धोकादायक)": val("toiletGirlDanger"),
     "मुलींसाठी स्वच्छतागृह (आवश्यक)": val("toiletGirlReq"),
     "मुलींसाठी स्वच्छतागृह (निर्लेखन)": textVal("toiletGirlWriteoff"),
-
     "मुलींसाठी मुतारी (एकूण)": val("urinalGirlTotal"),
     "मुलींसाठी मुतारी (वापरात)": val("urinalGirlUse"),
     "मुलींसाठी मुतारी (नादुरुस्त)": val("urinalGirlBad"),
     "मुलींसाठी मुतारी (धोकादायक)": val("urinalGirlDanger"),
     "मुलींसाठी मुतारी (आवश्यक)": val("urinalGirlReq"),
     "मुलींसाठी मुतारी (निर्लेखन)": textVal("urinalGirlWriteoff"),
-
     "मुलांसाठी स्वच्छतागृह (एकूण)": val("toiletBoyTotal"),
     "मुलांसाठी स्वच्छतागृह (वापरात)": val("toiletBoyUse"),
     "मुलांसाठी स्वच्छतागृह (नादुरुस्त)": val("toiletBoyBad"),
     "मुलांसाठी स्वच्छतागृह (धोकादायक)": val("toiletBoyDanger"),
     "मुलांसाठी स्वच्छतागृह (आवश्यक)": val("toiletBoyReq"),
     "मुलांसाठी स्वच्छतागृह (निर्लेखन)": textVal("toiletBoyWriteoff"),
-
     "मुलांसाठी मुतारी (एकूण)": val("urinalBoyTotal"),
     "मुलांसाठी मुतारी (वापरात)": val("urinalBoyUse"),
     "मुलांसाठी मुतारी (नादुरुस्त)": val("urinalBoyBad"),
     "मुलांसाठी मुतारी (धोकादायक)": val("urinalBoyDanger"),
     "मुलांसाठी मुतारी (आवश्यक)": val("urinalBoyReq"),
     "मुलांसाठी मुतारी (निर्लेखन)": textVal("urinalBoyWriteoff"),
-
     "दिव्यांगासाठी स्वच्छतागृह (एकूण)": val("toiletCwsnTotal"),
     "दिव्यांगासाठी स्वच्छतागृह (वापरात)": val("toiletCwsnUse"),
     "दिव्यांगासाठी स्वच्छतागृह (नादुरुस्त)": val("toiletCwsnBad"),
     "दिव्यांगासाठी स्वच्छतागृह (धोकादायक)": val("toiletCwsnDanger"),
     "दिव्यांगासाठी स्वच्छतागृह (आवश्यक)": val("toiletCwsnReq"),
     "दिव्यांगासाठी स्वच्छतागृह (निर्लेखन)": textVal("toiletCwsnWriteoff"),
-
     "स्वच्छतागृहासाठी पाणी": textVal("toiletWater"),
     "कमोड चेअर व्यवस्था": textVal("cwsnCommode"),
-    
     "पिण्याच्या पाण्याची व्यवस्था": textVal("drinkWater"),
     "वॉटर फिल्टर": textVal("waterFilter"),
-
     "विद्युत मीटर": textVal("elecMeter"),
     "ग्राहक क्रमांक": val("elecConsumer"),
     "विद्युत बिल थकीत रक्कम (₹)": val("elecDues"),
     "लाईट फिटींग पूर्ण खोल्या": val("lightDone"),
     "लाईट फिटींग आवश्यक खोल्या": val("lightReq"),
     "सोलर पॅनल": val("solarPanel"),
-    
     "रॅम्प स्थिती": textVal("rampStatus"),
-    
     "किचन शेड स्थिती": textVal("kitchenStatus"),
     "किचन शेड दुरुस्ती रक्कम/प्रस्ताव": val("kitchenCost"),
     "अग्निशमन यंत्र": textVal("fireExt"),
-    
     "संरक्षण भिंत प्रकार": textVal("wallType"),
     "संरक्षण भिंत स्थिती": textVal("wallStatus"),
-    
     "क्रीडांगण उपलब्धता": textVal("playgroundAvail"),
     "क्रीडांगण क्षेत्रफळ": val("playgroundArea"),
-
     "संगणक प्रयोगशाळा": textVal("compLabAvail") + (val("compLabCount") ? (" - संख्या: " + val("compLabCount")) : ""),
     "विज्ञान प्रयोगशाळा": textVal("sciLabAvail"),
     "डिजीटल साहित्य": textVal("digiMatAvail") + (val("digiMatCount") ? (" - संख्या: " + val("digiMatCount")) : ""),
@@ -837,10 +822,8 @@ function getFormDataObj() {
     "बोलक्या भिंती": textVal("wallPaintAvail") + (val("wallPaintCount") ? (" - संख्या: " + val("wallPaintCount")) : ""),
     "परस बाग": textVal("gardenAvail"),
     "खेळासाठी साहित्य": textVal("playMatAvail") + (val("playMatDesc") ? (" - विवरण: " + val("playMatDesc")) : ""),
-
     "शिष्यवृत्ती सहभाग विद्यार्थी": val("scholPart"),
     "शिष्यवृत्ती पात्र विद्यार्थी": val("scholPass"),
-    
     "विशेष उपक्रम": val("specAct"),
     "अभिप्राय": val("officerFeedback"),
     "भेट दिनांक": val("visitDate"),
@@ -849,67 +832,47 @@ function getFormDataObj() {
   };
 }
 
-// Single School Excel Export
 function exportToExcel() {
   const schoolSelect = document.getElementById("schoolSelect");
   if (!schoolSelect || schoolSelect.value === "") {
-    alert("कृपया प्रथम शाळा निवडा (Please select a school first).");
-    return;
+    alert("कृपया प्रथम शाळा निवडा."); return;
   }
   const payload = getFormDataObj();
-  
-  let ws_data = [
-    ["शाळांची भौतिक सुविधा बाबतची माहिती"], [], ["तपशील", "माहिती / मूल्य"]
-  ];
-  
-  for (const [key, value] of Object.entries(payload)) {
-    ws_data.push([key, value]);
-  }
-
+  let ws_data = [ ["शाळांची भौतिक सुविधा बाबतची माहिती"], [], ["तपशील", "माहिती / मूल्य"] ];
+  for (const [key, value] of Object.entries(payload)) { ws_data.push([key, value]); }
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(ws_data);
   ws['!cols'] = [{ wch: 50 }, { wch: 30 }];
-  
   XLSX.utils.book_append_sheet(wb, ws, "School Data");
   const udiseNum = document.getElementById("udise").value || "Report";
   XLSX.writeFile(wb, "School_Infra_Data_" + udiseNum + ".xlsx");
 }
 
-// Fetch All Data and Export Combined Excel
 function fetchAndExportCombinedExcel() {
   const btn = document.getElementById("fetchReportBtn");
-  btn.innerText = "⏳ डेटा सिंक होत आहे...";
-  btn.disabled = true;
+  btn.innerText = "⏳ डेटा सिंक होत आहे..."; btn.disabled = true;
 
   fetch(WEB_APP_URL)
     .then(response => response.json())
     .then(data => {
       if(!data || data.length === 0) {
         alert("कोणताही डेटा सापडला नाही.");
-        btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड";
-        btn.disabled = false;
-        return;
+        btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड"; btn.disabled = false; return;
       }
-
       const ws = XLSX.utils.json_to_sheet(data);
       ws['!pageSetup'] = { orientation: 'landscape', paperSize: 9 }; 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "All_Schools_Data");
       XLSX.writeFile(wb, "Combined_School_Report.xlsx");
-
-      btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड";
-      btn.disabled = false;
-      closeAdminModal();
+      btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड"; btn.disabled = false; closeAdminModal();
     })
     .catch(error => {
-      alert("डेटा फेच करताना अडचण आली.");
-      console.error("Fetch Error:", error);
-      btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड";
-      btn.disabled = false;
+      alert("डेटा फेच करताना अडचण आली."); console.error("Fetch Error:", error);
+      btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड"; btn.disabled = false;
     });
 }
 
-// --- नवीन: सर्व शाळांचा एकत्रित PDF रिपोर्ट बनवणे ---
+// --- नवीन: सर्व ३३ प्रश्न व ८२ कॉलम्सचे A4 Landscape PDF डिझाईन ---
 function fetchAndExportCombinedPDF() {
   const btn = document.getElementById("fetchPdfBtn");
   btn.innerText = "⏳ PDF तयार करत आहे...";
@@ -925,10 +888,56 @@ function fetchAndExportCombinedPDF() {
         return;
       }
 
-      // टेबल हेडर्स बनवणे (पहिल्या रो वरून)
-      const headers = Object.keys(data[0]);
-      
-      // HTML प्रिंट लेआउट बनवणे (A4 Landscape)
+      // ८२ रकाने ६ मुख्य गटात विभागले आहेत.
+      const sections = [
+        {
+          title: "१. शाळा, विद्यार्थी व कर्मचारी",
+          keys: ["शाळेचे नाव", "युडायस (U-DISE) नंबर", "शाळेचा प्रकार", "शाळेच्या जागेची मालकी", "मुख्याध्यापक यांचे नाव", "मुख्याध्यापकांचा मोबाईल क्रमांक", "पीएमश्री / आदर्श योजना", "योजनेचे नाव", "विद्यार्थी संख्या (मुले)", "विद्यार्थी संख्या (मुली)", "विद्यार्थी संख्या (एकूण)", "शिक्षक (मान्य पदे)", "शिक्षक (कार्यरत पदे)"]
+        },
+        {
+          title: "२. वर्गखोल्या",
+          keys: ["वर्गखोल्या (सुस्थितीत)", "वर्गखोल्या (दुरुस्ती आवश्यक)", "वर्गखोल्या (धोकादायक)", "दुरुस्ती आवश्यक रक्कम (₹)", "वर्गखोल्या निर्लेखन प्रस्ताव", "नवीन आवश्यक वर्गखोल्या"]
+        },
+        {
+          title: "३. स्वच्छतागृह (WASH) व पाणी",
+          keys: ["मुलींसाठी स्वच्छतागृह (एकूण)", "मुलींसाठी स्वच्छतागृह (वापरात)", "मुलींसाठी स्वच्छतागृह (नादुरुस्त)", "मुलींसाठी स्वच्छतागृह (धोकादायक)", "मुलींसाठी स्वच्छतागृह (आवश्यक)", "मुलींसाठी स्वच्छतागृह (निर्लेखन)", "मुलींसाठी मुतारी (एकूण)", "मुलींसाठी मुतारी (वापरात)", "मुलींसाठी मुतारी (नादुरुस्त)", "मुलींसाठी मुतारी (धोकादायक)", "मुलींसाठी मुतारी (आवश्यक)", "मुलींसाठी मुतारी (निर्लेखन)", "मुलांसाठी स्वच्छतागृह (एकूण)", "मुलांसाठी स्वच्छतागृह (वापरात)", "मुलांसाठी स्वच्छतागृह (नादुरुस्त)", "मुलांसाठी स्वच्छतागृह (धोकादायक)", "मुलांसाठी स्वच्छतागृह (आवश्यक)", "मुलांसाठी स्वच्छतागृह (निर्लेखन)", "मुलांसाठी मुतारी (एकूण)", "मुलांसाठी मुतारी (वापरात)", "मुलांसाठी मुतारी (नादुरुस्त)", "मुलांसाठी मुतारी (धोकादायक)", "मुलांसाठी मुतारी (आवश्यक)", "मुलांसाठी मुतारी (निर्लेखन)", "दिव्यांगासाठी स्वच्छतागृह (एकूण)", "दिव्यांगासाठी स्वच्छतागृह (वापरात)", "दिव्यांगासाठी स्वच्छतागृह (नादुरुस्त)", "दिव्यांगासाठी स्वच्छतागृह (धोकादायक)", "दिव्यांगासाठी स्वच्छतागृह (आवश्यक)", "दिव्यांगासाठी स्वच्छतागृह (निर्लेखन)", "स्वच्छतागृहासाठी पाणी", "कमोड चेअर व्यवस्था", "पिण्याच्या पाण्याची व्यवस्था", "वॉटर फिल्टर"]
+        },
+        {
+          title: "४. वीज व सुविधा",
+          keys: ["विद्युत मीटर", "ग्राहक क्रमांक", "विद्युत बिल थकीत रक्कम (₹)", "लाईट फिटींग पूर्ण खोल्या", "लाईट फिटींग आवश्यक खोल्या", "सोलर पॅनल", "रॅम्प स्थिती", "किचन शेड स्थिती", "किचन शेड दुरुस्ती रक्कम/प्रस्ताव", "अग्निशमन यंत्र", "संरक्षण भिंत प्रकार", "संरक्षण भिंत स्थिती", "क्रीडांगण उपलब्धता", "क्रीडांगण क्षेत्रफळ"]
+        },
+        {
+          title: "५. शैक्षणिक व इतर",
+          keys: ["संगणक प्रयोगशाळा", "विज्ञान प्रयोगशाळा", "डिजीटल साहित्य", "लायब्ररी", "वायफाय सुविधा", "बोलक्या भिंती", "परस बाग", "खेळासाठी साहित्य", "शिष्यवृत्ती सहभाग विद्यार्थी", "शिष्यवृत्ती पात्र विद्यार्थी", "विशेष उपक्रम"]
+        },
+        {
+          title: "६. पडताळणी",
+          keys: ["अभिप्राय", "भेट दिनांक", "अधिकाऱ्याचे नाव", "हुद्दा"]
+        }
+      ];
+
+      // रकाण्यांची नावे लहान करण्यासाठी फंक्शन (जेणेकरून A4 मध्ये बसतील)
+      function getShortHeader(k) {
+        return k.replace("मुलींसाठी स्वच्छतागृह", "मुली स्व.")
+                .replace("मुलींसाठी मुतारी", "मुली मु.")
+                .replace("मुलांसाठी स्वच्छतागृह", "मुले स्व.")
+                .replace("मुलांसाठी मुतारी", "मुले मु.")
+                .replace("दिव्यांगासाठी स्वच्छतागृह", "दिव्यांग स्व.")
+                .replace("विद्यार्थी संख्या", "विद्यार्थी")
+                .replace("वर्गखोल्या", "खोल्या")
+                .replace(" (₹)", "")
+                .replace("शिक्षक (मान्य पदे)", "मान्य शिक्षक")
+                .replace("शिक्षक (कार्यरत पदे)", "कार्यरत शिक्षक")
+                .replace("पिण्याच्या पाण्याची व्यवस्था", "पिण्याचे पाणी")
+                .replace("स्वच्छतागृहासाठी पाणी", "स्व. पाणी")
+                .replace("क्रीडांगण", "मैदान")
+                .replace("युडायस (U-DISE) नंबर", "U-DISE")
+                .replace("मुख्याध्यापकांचा मोबाईल क्रमांक", "मुख्या. मोबाईल")
+                .replace("दुरुस्ती आवश्यक", "दुरुस्ती आव.")
+                .replace("निर्लेखन प्रस्ताव", "निर्लेखन")
+                .replace("नवीन आवश्यक", "नवीन आव.");
+      }
+
       let htmlContent = `
         <!DOCTYPE html>
         <html lang="mr">
@@ -937,37 +946,57 @@ function fetchAndExportCombinedPDF() {
           <title>सर्व शाळांचा एकत्रित अहवाल</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&display=swap');
-            @page { size: A4 landscape; margin: 10mm; }
-            body { font-family: 'Mukta', sans-serif; font-size: 8pt; color: #000; background: #fff; }
-            h2 { text-align: center; font-size: 14pt; margin-bottom: 20px; color: #1c2b4a; }
+            @page { size: A4 landscape; margin: 4mm; }
+            body { font-family: 'Mukta', sans-serif; font-size: 5pt; color: #000; background: #fff; margin: 0; padding: 0; }
+            h2 { text-align: center; font-size: 11pt; margin: 4px 0; color: #1c2b4a; }
             table { width: 100%; border-collapse: collapse; table-layout: auto; }
-            th, td { border: 1px solid #777; padding: 4px; text-align: left; word-wrap: break-word; }
-            th { background-color: #eaf0fb; font-weight: 700; color: #1c2b4a; font-size: 9pt; }
-            tr { page-break-inside: avoid; }
-            thead { display: table-header-group; }
+            th, td { border: 0.5px solid #333; padding: 1px 2px; text-align: center; vertical-align: middle; word-wrap: break-word; }
+            th { background-color: #f2f2f2; font-weight: 700; color: #000; }
+            .main-th { font-size: 6.5pt; padding: 2px; border-bottom: 1.5px solid #000; }
+            .sub-th { font-size: 5.5pt; height: 75px; }
+            
+            /* Vertical Text Class */
+            .vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; padding: 1px; margin: 0 auto; }
+            
+            .text-cell { text-align: left; min-width: 40px; max-width: 80px; font-size: 5pt; }
+            .num-cell { text-align: center; font-size: 5.5pt; }
           </style>
         </head>
         <body>
-          <h2>सर्व शाळांची भौतिक सुविधा माहिती - एकत्रित अहवाल</h2>
+          <h2>शाळांची भौतिक सुविधा माहिती - एकत्रित अहवाल</h2>
           <table>
             <thead>
-              <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+              <tr>
+                ${sections.map(s => `<th class="main-th" colspan="${s.keys.length}">${s.title}</th>`).join('')}
+              </tr>
+              <tr>
+                ${sections.map(s => s.keys.map(k => {
+                   let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
+                   return `<th class="sub-th"><div class="${isText ? '' : 'vert'}">${getShortHeader(k)}</div></th>`;
+                }).join('')).join('')}
+              </tr>
             </thead>
             <tbody>
-              ${data.map(row => `<tr>${headers.map(h => `<td>${row[h] !== null ? row[h] : ''}</td>`).join('')}</tr>`).join('')}
+              ${data.map(row => `
+                <tr>
+                  ${sections.map(s => s.keys.map(k => {
+                     let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
+                     let val = row[k] !== undefined && row[k] !== null && row[k] !== "" ? row[k] : '-';
+                     return `<td class="${isText ? 'text-cell' : 'num-cell'}">${val}</td>`;
+                  }).join('')).join('')}
+                </tr>
+              `).join('')}
             </tbody>
           </table>
           <script>
-            // पान लोड झाल्यावर आपोआप प्रिंट डायलॉग ओपन होईल
             window.onload = function() { 
-              setTimeout(function() { window.print(); }, 500);
+              setTimeout(function() { window.print(); }, 1000);
             }
           <\/script>
         </body>
         </html>
       `;
 
-      // नवीन टॅब/विंडो उघडणे व त्यात HTML भरणे
       const printWindow = window.open('', '_blank');
       printWindow.document.open();
       printWindow.document.write(htmlContent);
@@ -988,30 +1017,23 @@ function fetchAndExportCombinedPDF() {
 function submitOnline() {
   const schoolSelect = document.getElementById("schoolSelect");
   if (!schoolSelect || schoolSelect.value === "") {
-    alert("कृपया प्रथम शाळा निवडा (Please select a school first).");
-    return;
+    alert("कृपया प्रथम शाळा निवडा (Please select a school first)."); return;
   }
-
   const btn = document.getElementById("onlineSubmitBtn");
-  btn.innerText = "⏳ पाठवत आहे...";
-  btn.disabled = true;
-
-  const payload = getFormDataObj();
+  btn.innerText = "⏳ पाठवत आहे..."; btn.disabled = true;
 
   fetch(WEB_APP_URL, {
     method: 'POST',
     mode: 'no-cors', 
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(getFormDataObj())
   }).then(() => {
-    alert("माहिती यशस्वीरित्या ऑनलाईन सबमिट झाली! (Data submitted successfully!)");
-    btn.innerText = "☁️ सबमिट";
-    btn.disabled = false;
+    alert("माहिती यशस्वीरित्या ऑनलाईन सबमिट झाली!");
+    btn.innerText = "☁️ सबमिट"; btn.disabled = false;
   }).catch((error) => {
-    alert("तांत्रिक अडचण! कृपया पुन्हा प्रयत्न करा. (Error submitting data)");
+    alert("तांत्रिक अडचण! कृपया पुन्हा प्रयत्न करा.");
     console.error("Error:", error);
-    btn.innerText = "☁️ सबमिट";
-    btn.disabled = false;
+    btn.innerText = "☁️ सबमिट"; btn.disabled = false;
   });
 }
 </script>
