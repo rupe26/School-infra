@@ -37,14 +37,19 @@
     padding: 1rem;
     position: sticky; top: 0; z-index: 50;
     box-shadow: 0 4px 12px rgba(0,0,0,.1);
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
-  header.topbar h1 { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.4; }
+  header.topbar h1 { margin: 0; font-size: 1.25rem; font-weight: 700; line-height: 1.4; flex-grow: 1; text-align: center;}
   
+  .admin-icon {
+    background: none; border: none; font-size: 1.5rem; color: #fff; cursor: pointer;
+  }
+
   main { max-width: 800px; margin: 15px auto; padding: 0 10px; }
   
-  /* Linear Accordion Styling */
   details.section {
     background: var(--card-bg); 
     border-radius: 12px;
@@ -67,10 +72,7 @@
   
   .section-body { padding: 16px; }
   
-  /* Form Layout */
-  .field-group {
-    margin-bottom: 16px;
-  }
+  .field-group { margin-bottom: 16px; }
   
   .sub-card {
     background: var(--accent-light);
@@ -91,7 +93,6 @@
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
   
-  /* Mobile First Adjustments */
   @media (max-width: 600px) { 
     .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 16px; } 
     .grid-2-mobile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } 
@@ -116,22 +117,19 @@
     border-radius: 8px; font-size: 1rem; 
     font-family: inherit; background: #fff;
     transition: border-color 0.2s;
-    appearance: none;
-    -webkit-appearance: none;
+    appearance: none; -webkit-appearance: none;
   }
   
-  input:focus, select:focus, textarea:focus {
-    outline: none; border-color: var(--accent);
-  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
   
-  input[readonly] { 
-    background: #eef1f8; font-weight: 600; 
-    color: var(--text-muted); border-color: transparent; 
+  input[readonly], input:disabled, textarea:disabled, select:disabled { 
+    background: #eef1f8 !important; font-weight: 600; 
+    color: var(--text-muted); border-color: transparent !important; 
+    cursor: not-allowed;
   }
   
   textarea { min-height: 80px; resize: vertical; }
   
-  /* Floating Bottom Toolbar for Mobile */
   .toolbar {
     position: fixed; bottom: 0; left: 0; width: 100%;
     background: #fff; padding: 12px;
@@ -151,33 +149,52 @@
   button:hover { opacity: 0.9; }
   .excel-btn { background: #217346; } 
   .online-btn { background: #d93025; } 
-  .print-btn { background: var(--navy2); }
-  
-  /* Print Styles */
-  @media print {
-    body { background: #fff !important; color: #000 !important; padding: 0 !important; }
-    .toolbar { display: none !important; }
-    main { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-    header.topbar { background: transparent !important; color: #000 !important; box-shadow: none !important; border-bottom: 2px solid #000; padding: 0 0 10px 0; margin-bottom: 20px; position: static; }
-    details.section { border: 1px solid #000 !important; border-radius: 0 !important; break-inside: avoid; margin-bottom: 10px; box-shadow: none; }
-    details.section > summary { background: transparent !important; color: #000 !important; border-bottom: 1px solid #000 !important; font-size: 1.1rem; padding: 8px 10px; }
-    details.section > summary:after { display: none !important; }
-    .sub-card { background: transparent; border: 1px dashed #666; padding: 8px; margin-bottom: 10px; break-inside: avoid;}
-    input[type=text], input[type=number], input[type=date], select, textarea { background: #fff !important; border: 1px solid #000 !important; border-radius: 0 !important; color: #000 !important; padding: 4px 6px; }
-    input[readonly] { background: transparent !important; border: none !important; border-bottom: 1px dashed #000 !important; }
+
+  /* Modal Styling */
+  .modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;
   }
+  .modal-content {
+    background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px;
+  }
+  .modal-content h3 { margin-top: 0; color: var(--navy); }
 </style>
 </head>
 <body>
 
 <header class="topbar">
-  <h1>शाळांची भौतिक सुविधा माहिती प्रपत्र</h1>
+  <div style="width: 24px;"></div> <!-- Spacer for center alignment -->
+  <h1>शाळांची भौतिक सुविधा माहिती</h1>
+  <button class="admin-icon" onclick="openAdminModal()" title="Admin Settings">⚙️</button>
 </header>
 
-<main>
-  <form id="infraForm" onsubmit="event.preventDefault(); window.print();">
+<!-- Admin/Settings Modal -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-content">
+    <h3>⚙️ अॅडमिन सेटिंग्ज</h3>
+    <div class="field-group">
+      <label>डीफॉल्ट अधिकाऱ्याचे नाव</label>
+      <input type="text" id="adminOffName" placeholder="उदा. श्री. पाटील">
+    </div>
+    <div class="field-group">
+      <label>डीफॉल्ट हुद्दा</label>
+      <input type="text" id="adminOffDesig" placeholder="उदा. केंद्रप्रमुख">
+    </div>
+    <button type="button" onclick="saveAdminSettings()" style="width:100%; margin-bottom:15px; background:var(--accent);">💾 सेव्ह करा</button>
     
-    <!-- 1. शाळा व कर्मचारी माहिती -->
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
+    
+    <h4 style="margin-top:0; color:var(--navy2);">सर्व शाळांचा एकत्रित रिपोर्ट</h4>
+    <button type="button" class="excel-btn" id="fetchReportBtn" onclick="fetchAndExportCombinedExcel()" style="width:100%;">📥 डेटा सिंक व एक्सेल डाउनलोड</button>
+    
+    <button type="button" onclick="closeAdminModal()" style="width:100%; background:#777; margin-top:15px;">❌ बंद करा</button>
+  </div>
+</div>
+
+<main>
+  <form id="infraForm" onsubmit="event.preventDefault();">
+    
     <details class="section" open>
       <summary>१. शाळा, विद्यार्थी व कर्मचारी</summary>
       <div class="section-body">
@@ -187,7 +204,6 @@
           <select id="schoolSelect" required></select>
         </div>
 
-        <!-- नवीन शाळेचे नाव टाकण्यासाठी (फक्त इतर निवडल्यास दिसेल) -->
         <div class="field-group" id="otherSchoolGroup" style="display: none;">
           <label>नवीन शाळेचे नाव प्रविष्ट करा *</label>
           <input type="text" id="otherSchoolName" placeholder="उदा. जि.प.प्रा.शा. नवीन गाव">
@@ -210,7 +226,12 @@
 
         <div class="field-group">
           <label>४. शाळेच्या जागेची मालकी</label>
-          <input type="text" id="landOwnership" placeholder="उदा. जि.प., ग्रामपंचायत, खाजगी">
+          <select id="landOwnership">
+            <option value="">-- निवडा --</option>
+            <option value="जिल्हा परिषद">जिल्हा परिषद</option>
+            <option value="भाडेतत्त्वावर">भाडेतत्त्वावर</option>
+            <option value="खाजगी">खाजगी</option>
+          </select>
         </div>
 
         <div class="grid-2">
@@ -255,48 +276,24 @@
       </div>
     </details>
 
-    <!-- 2. वर्गखोल्या बाबत माहिती -->
     <details class="section">
       <summary>२. वर्गखोल्या (Classrooms)</summary>
       <div class="section-body">
-        
         <div class="grid-2">
-          <div class="field-group">
-            <label>सुस्थितीत असलेल्या वर्गखोल्या</label>
-            <input type="number" id="classGood" min="0">
-          </div>
-          <div class="field-group">
-            <label>दुरुस्ती आवश्यक वर्गखोल्या</label>
-            <input type="number" id="classRepair" min="0">
-          </div>
+          <div class="field-group"><label>सुस्थितीत असलेल्या वर्गखोल्या</label><input type="number" id="classGood" min="0"></div>
+          <div class="field-group"><label>दुरुस्ती आवश्यक वर्गखोल्या</label><input type="number" id="classRepair" min="0"></div>
         </div>
-
         <div class="grid-2">
-          <div class="field-group">
-            <label>धोकादायक वर्गखोल्या</label>
-            <input type="number" id="classDanger" min="0">
-          </div>
-          <div class="field-group">
-            <label>धोकादायक निर्लेखन प्रस्ताव दाखल?</label>
-            <select id="classWriteoff"><option>नाही</option><option>होय</option></select>
-          </div>
+          <div class="field-group"><label>धोकादायक वर्गखोल्या</label><input type="number" id="classDanger" min="0"></div>
+          <div class="field-group"><label>धोकादायक निर्लेखन प्रस्ताव दाखल?</label><select id="classWriteoff"><option>नाही</option><option>होय</option></select></div>
         </div>
-
         <div class="grid-2">
-          <div class="field-group">
-            <label>दुरुस्ती करिता आवश्यक रक्कम (₹)</label>
-            <input type="number" id="classRepairCost" min="0" placeholder="रक्कम">
-          </div>
-          <div class="field-group">
-            <label>नवीन आवश्यक वर्गखोल्या संख्या</label>
-            <input type="number" id="classNewReq" min="0">
-          </div>
+          <div class="field-group"><label>दुरुस्ती करिता आवश्यक रक्कम (₹)</label><input type="number" id="classRepairCost" min="0" placeholder="रक्कम"></div>
+          <div class="field-group"><label>नवीन आवश्यक वर्गखोल्या संख्या</label><input type="number" id="classNewReq" min="0"></div>
         </div>
-
       </div>
     </details>
 
-    <!-- 3. स्वच्छतागृह व पाणी व्यवस्था -->
     <details class="section">
       <summary>३. WASH (स्वच्छतागृह व पाणी)</summary>
       <div class="section-body">
@@ -308,6 +305,7 @@
             <div><span class="hint">वापरात</span><input type="number" id="toiletGirlUse" min="0"></div>
             <div><span class="hint">नादुरुस्त</span><input type="number" id="toiletGirlBad" min="0"></div>
             <div><span class="hint">धोकादायक</span><input type="number" id="toiletGirlDanger" min="0"></div>
+            <div><span class="hint">आवश्यक</span><input type="number" id="toiletGirlReq" min="0"></div>
             <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="toiletGirlWriteoff"><option>नाही</option><option>होय</option></select></div>
           </div>
         </div>
@@ -319,6 +317,7 @@
             <div><span class="hint">वापरात</span><input type="number" id="urinalGirlUse" min="0"></div>
             <div><span class="hint">नादुरुस्त</span><input type="number" id="urinalGirlBad" min="0"></div>
             <div><span class="hint">धोकादायक</span><input type="number" id="urinalGirlDanger" min="0"></div>
+            <div><span class="hint">आवश्यक</span><input type="number" id="urinalGirlReq" min="0"></div>
             <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="urinalGirlWriteoff"><option>नाही</option><option>होय</option></select></div>
           </div>
         </div>
@@ -330,6 +329,7 @@
             <div><span class="hint">वापरात</span><input type="number" id="toiletBoyUse" min="0"></div>
             <div><span class="hint">नादुरुस्त</span><input type="number" id="toiletBoyBad" min="0"></div>
             <div><span class="hint">धोकादायक</span><input type="number" id="toiletBoyDanger" min="0"></div>
+            <div><span class="hint">आवश्यक</span><input type="number" id="toiletBoyReq" min="0"></div>
             <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="toiletBoyWriteoff"><option>नाही</option><option>होय</option></select></div>
           </div>
         </div>
@@ -341,32 +341,36 @@
             <div><span class="hint">वापरात</span><input type="number" id="urinalBoyUse" min="0"></div>
             <div><span class="hint">नादुरुस्त</span><input type="number" id="urinalBoyBad" min="0"></div>
             <div><span class="hint">धोकादायक</span><input type="number" id="urinalBoyDanger" min="0"></div>
+            <div><span class="hint">आवश्यक</span><input type="number" id="urinalBoyReq" min="0"></div>
             <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="urinalBoyWriteoff"><option>नाही</option><option>होय</option></select></div>
           </div>
         </div>
 
         <div class="sub-card">
-          <h4>१४. दिव्यांगासाठी स्वच्छतागृह</h4>
+          <h4>१३ व १४. दिव्यांगासाठी स्वच्छतागृह व पाण्याची व्यवस्था</h4>
           <div class="grid-2-mobile">
             <div><span class="hint">एकूण उपलब्ध</span><input type="number" id="toiletCwsnTotal" min="0"></div>
             <div><span class="hint">वापरात</span><input type="number" id="toiletCwsnUse" min="0"></div>
             <div><span class="hint">नादुरुस्त</span><input type="number" id="toiletCwsnBad" min="0"></div>
             <div><span class="hint">धोकादायक</span><input type="number" id="toiletCwsnDanger" min="0"></div>
+            <div><span class="hint">आवश्यक</span><input type="number" id="toiletCwsnReq" min="0"></div>
             <div><span class="hint">निर्लेखन प्रस्ताव?</span><select id="toiletCwsnWriteoff"><option>नाही</option><option>होय</option></select></div>
           </div>
-        </div>
-
-        <div class="sub-card">
-          <h4>पाणी व इतर व्यवस्था</h4>
-          <div class="grid-2">
-            <div class="field-group">
-              <span class="hint">१४ (ब). कमोड चेअर तात्पुरती व्यवस्था?</span>
-              <select id="cwsnCommode"><option>नाही</option><option>आहे</option></select>
-            </div>
+          <div class="grid-2" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
             <div class="field-group">
               <span class="hint">१३. स्वच्छतागृहासाठी पाण्याची व्यवस्था</span>
               <select id="toiletWater"><option value="आहे">आहे</option><option value="तात्पुरती">तात्पुरती</option><option value="नाही">नाही</option></select>
             </div>
+            <div class="field-group">
+              <span class="hint">१४ (ब). कमोड चेअर तात्पुरती व्यवस्था?</span>
+              <select id="cwsnCommode"><option>नाही</option><option>आहे</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-card">
+          <h4>१५ व १६. पिण्याच्या पाण्याची व्यवस्था</h4>
+          <div class="grid-2">
             <div class="field-group">
               <span class="hint">१५. पिण्याच्या पाण्याची व्यवस्था</span>
               <select id="drinkWater"><option>नळाव्दारे</option><option>विंधन विहीर</option><option>इतर</option></select>
@@ -381,7 +385,6 @@
       </div>
     </details>
 
-    <!-- 4. वीज व भौतिक सुविधा -->
     <details class="section">
       <summary>४. वीज, किचन शेड व भौतिक सुविधा</summary>
       <div class="section-body">
@@ -443,7 +446,6 @@
       </div>
     </details>
 
-    <!-- 5. शैक्षणिक, तंत्रज्ञान व इतर सुविधा -->
     <details class="section">
       <summary>५. शैक्षणिक, तंत्रज्ञान व इतर</summary>
       <div class="section-body">
@@ -510,7 +512,6 @@
       </div>
     </details>
 
-    <!-- 6. पडताळणी -->
     <details class="section" open>
       <summary>६. स्वाक्षरी व पडताळणी</summary>
       <div class="section-body">
@@ -528,15 +529,13 @@
     </details>
 
     <div class="toolbar">
-      <button type="submit" class="print-btn">🖨️ प्रिंट</button>
-      <button type="button" class="excel-btn" onclick="exportToExcel()">📊 Excel</button>
+      <button type="button" class="excel-btn" onclick="exportToExcel()">📊 एक शाळा Excel</button>
       <button type="button" class="online-btn" id="onlineSubmitBtn" onclick="submitOnline()">☁️ सबमिट</button>
     </div>
   </form>
 </main>
 
 <script>
-// Data
 const SCHOOLS = [
   {name:"सी.पी.एस. रविवार पेठ", udise:"27270101612"},
   {name:"जि.प.प्रा.शा. क्र. २, अंबाजोगाई", udise:"27270101613"},
@@ -612,15 +611,42 @@ const TEACHERS_DATA = {
   "जि.प.प्रा.शा. गिरवली आपेट": [ "अर्जुन सूर्यकांत चव्हाण", "सुनिल आनंदराव फुलेवार" ]
 };
 
-window.onbeforeprint = function() {
-  document.querySelectorAll('details').forEach(el => el.setAttribute('open', ''));
-};
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxiHlIKs8U5jGgSFqN0ZokOAymG4LuSwgDRM1CiFm4QI5hcRMZeEFlgwjDryl-JsFI/exec"; 
+
+// --- Admin Settings Logic ---
+function openAdminModal() {
+  document.getElementById('adminModal').style.display = 'flex';
+  document.getElementById('adminOffName').value = localStorage.getItem('defaultOfficerName') || '';
+  document.getElementById('adminOffDesig').value = localStorage.getItem('defaultOfficerDesignation') || '';
+}
+
+function closeAdminModal() {
+  document.getElementById('adminModal').style.display = 'none';
+}
+
+function saveAdminSettings() {
+  const name = document.getElementById('adminOffName').value;
+  const desig = document.getElementById('adminOffDesig').value;
+  localStorage.setItem('defaultOfficerName', name);
+  localStorage.setItem('defaultOfficerDesignation', desig);
+  alert('सेटिंग्ज यशस्वीरित्या सेव्ह झाल्या!');
+  applyDefaultOfficer();
+  closeAdminModal();
+}
+
+function applyDefaultOfficer() {
+  const n = localStorage.getItem('defaultOfficerName');
+  const d = localStorage.getItem('defaultOfficerDesignation');
+  if(n) document.getElementById('officerName').value = n;
+  if(d) document.getElementById('officerDesignation').value = d;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
+  applyDefaultOfficer(); // Apply default officer on load
+
   const schoolSelect = document.getElementById("schoolSelect");
   schoolSelect.innerHTML = '<option value="">-- शाळा निवडा --</option>';
   
-  // अस्तित्वात असलेल्या शाळा जोडणे
   SCHOOLS.forEach((school, index) => {
     const opt = document.createElement("option");
     opt.value = index;
@@ -628,7 +654,6 @@ document.addEventListener("DOMContentLoaded", () => {
     schoolSelect.appendChild(opt);
   });
 
-  // नवीन शाळा (Other) पर्याय जोडणे
   const otherOpt = document.createElement("option");
   otherOpt.value = "other";
   otherOpt.textContent = "इतर (नवीन शाळा जोडा)";
@@ -642,49 +667,57 @@ document.addEventListener("DOMContentLoaded", () => {
     const teacherWorkingInput = document.getElementById("teacherWorking");
 
     if (val === "other") {
-      // इतर शाळा निवडल्यास सर्व बॉक्स रिकामे करून मॅन्युअल एंट्रीसाठी उघडणे
       otherGroup.style.display = "block";
       document.getElementById("otherSchoolName").setAttribute("required", "true");
-      
-      udiseInput.value = "";
-      hmNameInput.value = "";
-      teacherWorkingInput.value = "";
-      
-      udiseInput.removeAttribute("readonly");
-      hmNameInput.removeAttribute("readonly");
-      teacherWorkingInput.removeAttribute("readonly");
-      
-      udiseInput.placeholder = "नवीन युडायस नंबर टाका";
-      hmNameInput.placeholder = "मुख्याध्यापकांचे नाव टाका";
-      
+      udiseInput.value = ""; hmNameInput.value = ""; teacherWorkingInput.value = "";
+      udiseInput.removeAttribute("readonly"); hmNameInput.removeAttribute("readonly"); teacherWorkingInput.removeAttribute("readonly");
+      udiseInput.placeholder = "नवीन युडायस नंबर टाका"; hmNameInput.placeholder = "मुख्याध्यापकांचे नाव टाका";
     } else if (val === "") {
-      // काहीही न निवडल्यास मूळ स्थितीत आणणे
       otherGroup.style.display = "none";
       document.getElementById("otherSchoolName").removeAttribute("required");
-      
-      udiseInput.value = "";
-      hmNameInput.value = "";
-      teacherWorkingInput.value = "";
-      
-      udiseInput.setAttribute("readonly", "true");
-      hmNameInput.setAttribute("readonly", "true");
-      teacherWorkingInput.setAttribute("readonly", "true");
-      
+      udiseInput.value = ""; hmNameInput.value = ""; teacherWorkingInput.value = "";
+      udiseInput.setAttribute("readonly", "true"); hmNameInput.setAttribute("readonly", "true"); teacherWorkingInput.setAttribute("readonly", "true");
     } else {
-      // यादीतील शाळा निवडल्यास डेटा आपोआप भरणे व बॉक्स लॉक करणे
       otherGroup.style.display = "none";
       document.getElementById("otherSchoolName").removeAttribute("required");
-      
       const selectedSchool = SCHOOLS[val];
       const schoolName = selectedSchool.name;
       udiseInput.value = selectedSchool.udise;
       hmNameInput.value = HEADMASTERS[schoolName] || "";
       const teachersList = TEACHERS_DATA[schoolName] || [];
       teacherWorkingInput.value = teachersList.length;
-      
-      udiseInput.setAttribute("readonly", "true");
-      hmNameInput.setAttribute("readonly", "true");
-      teacherWorkingInput.setAttribute("readonly", "true");
+      udiseInput.setAttribute("readonly", "true"); hmNameInput.setAttribute("readonly", "true"); teacherWorkingInput.setAttribute("readonly", "true");
+    }
+  });
+
+  // Dependent Inputs Block Logic 
+  // (Including Compound Wall Logic)
+  const dependencies = [
+    { select: "isPmShri", input: "pmShriName", condition: (val) => val === "आहे" },
+    { select: "elecMeter", input: "elecConsumer", condition: (val) => val === "आहे" },
+    { select: "elecMeter", input: "elecDues", condition: (val) => val === "आहे" },
+    { select: "playgroundAvail", input: "playgroundArea", condition: (val) => val === "आहे" },
+    { select: "compLabAvail", input: "compLabCount", condition: (val) => val === "आहे" },
+    { select: "digiMatAvail", input: "digiMatCount", condition: (val) => val === "आहे" },
+    { select: "wallPaintAvail", input: "wallPaintCount", condition: (val) => val === "आहे" },
+    { select: "playMatAvail", input: "playMatDesc", condition: (val) => val === "आहे" },
+    { select: "wallType", input: "wallStatus", condition: (val) => val !== "नाही" } // जर संरक्षण भिंत 'नाही' असेल तर 'स्थिती' ब्लॉक करा
+  ];
+
+  dependencies.forEach(dep => {
+    const sel = document.getElementById(dep.select);
+    const inp = document.getElementById(dep.input);
+    if(sel && inp) {
+      const toggle = () => {
+        if(dep.condition(sel.value)) {
+          inp.disabled = false;
+        } else {
+          inp.disabled = true;
+          inp.value = "";
+        }
+      };
+      sel.addEventListener("change", toggle);
+      toggle();
     }
   });
 });
@@ -704,7 +737,6 @@ function getFormDataObj() {
     return el.value;
   };
 
-  // शाळेचे नाव ठरवणे (यादीतील की नवीन टाकलेले)
   let finalSchoolName = "";
   if (document.getElementById("schoolSelect").value === "other") {
     finalSchoolName = document.getElementById("otherSchoolName").value;
@@ -712,11 +744,11 @@ function getFormDataObj() {
     finalSchoolName = textVal("schoolSelect");
   }
 
-  let payload = {
+  return {
     "शाळेचे नाव": finalSchoolName,
     "युडायस (U-DISE) नंबर": val("udise"),
     "शाळेचा प्रकार": textVal("schoolType"),
-    "शाळेच्या जागेची मालकी": val("landOwnership"),
+    "शाळेच्या जागेची मालकी": textVal("landOwnership"),
     "मुख्याध्यापक यांचे नाव": val("hmName"),
     "मुख्याध्यापकांचा मोबाईल क्रमांक": val("hmMobile"),
     "पीएमश्री / आदर्श योजना": textVal("isPmShri"),
@@ -738,34 +770,40 @@ function getFormDataObj() {
     "मुलींसाठी स्वच्छतागृह (वापरात)": val("toiletGirlUse"),
     "मुलींसाठी स्वच्छतागृह (नादुरुस्त)": val("toiletGirlBad"),
     "मुलींसाठी स्वच्छतागृह (धोकादायक)": val("toiletGirlDanger"),
+    "मुलींसाठी स्वच्छतागृह (आवश्यक)": val("toiletGirlReq"),
     "मुलींसाठी स्वच्छतागृह (निर्लेखन)": textVal("toiletGirlWriteoff"),
 
     "मुलींसाठी मुतारी (एकूण)": val("urinalGirlTotal"),
     "मुलींसाठी मुतारी (वापरात)": val("urinalGirlUse"),
     "मुलींसाठी मुतारी (नादुरुस्त)": val("urinalGirlBad"),
     "मुलींसाठी मुतारी (धोकादायक)": val("urinalGirlDanger"),
+    "मुलींसाठी मुतारी (आवश्यक)": val("urinalGirlReq"),
     "मुलींसाठी मुतारी (निर्लेखन)": textVal("urinalGirlWriteoff"),
 
     "मुलांसाठी स्वच्छतागृह (एकूण)": val("toiletBoyTotal"),
     "मुलांसाठी स्वच्छतागृह (वापरात)": val("toiletBoyUse"),
     "मुलांसाठी स्वच्छतागृह (नादुरुस्त)": val("toiletBoyBad"),
     "मुलांसाठी स्वच्छतागृह (धोकादायक)": val("toiletBoyDanger"),
+    "मुलांसाठी स्वच्छतागृह (आवश्यक)": val("toiletBoyReq"),
     "मुलांसाठी स्वच्छतागृह (निर्लेखन)": textVal("toiletBoyWriteoff"),
 
     "मुलांसाठी मुतारी (एकूण)": val("urinalBoyTotal"),
     "मुलांसाठी मुतारी (वापरात)": val("urinalBoyUse"),
     "मुलांसाठी मुतारी (नादुरुस्त)": val("urinalBoyBad"),
     "मुलांसाठी मुतारी (धोकादायक)": val("urinalBoyDanger"),
+    "मुलांसाठी मुतारी (आवश्यक)": val("urinalBoyReq"),
     "मुलांसाठी मुतारी (निर्लेखन)": textVal("urinalBoyWriteoff"),
 
     "दिव्यांगासाठी स्वच्छतागृह (एकूण)": val("toiletCwsnTotal"),
     "दिव्यांगासाठी स्वच्छतागृह (वापरात)": val("toiletCwsnUse"),
     "दिव्यांगासाठी स्वच्छतागृह (नादुरुस्त)": val("toiletCwsnBad"),
     "दिव्यांगासाठी स्वच्छतागृह (धोकादायक)": val("toiletCwsnDanger"),
+    "दिव्यांगासाठी स्वच्छतागृह (आवश्यक)": val("toiletCwsnReq"),
     "दिव्यांगासाठी स्वच्छतागृह (निर्लेखन)": textVal("toiletCwsnWriteoff"),
 
-    "कमोड चेअर व्यवस्था": textVal("cwsnCommode"),
     "स्वच्छतागृहासाठी पाणी": textVal("toiletWater"),
+    "कमोड चेअर व्यवस्था": textVal("cwsnCommode"),
+    
     "पिण्याच्या पाण्याची व्यवस्था": textVal("drinkWater"),
     "वॉटर फिल्टर": textVal("waterFilter"),
 
@@ -806,9 +844,9 @@ function getFormDataObj() {
     "अधिकाऱ्याचे नाव": val("officerName"),
     "हुद्दा": val("officerDesignation")
   };
-  return payload;
 }
 
+// Single School Excel Export
 function exportToExcel() {
   const schoolSelect = document.getElementById("schoolSelect");
   if (!schoolSelect || schoolSelect.value === "") {
@@ -828,15 +866,50 @@ function exportToExcel() {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(ws_data);
   ws['!cols'] = [{ wch: 50 }, { wch: 30 }];
+  
   XLSX.utils.book_append_sheet(wb, ws, "School Data");
   const udiseNum = document.getElementById("udise").value || "Report";
   XLSX.writeFile(wb, "School_Infra_Data_" + udiseNum + ".xlsx");
 }
 
-/* ============================================================
-   ONLINE DATA SUBMISSION (GOOGLE APPS SCRIPT)
-   ============================================================ */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxiHlIKs8U5jGgSFqN0ZokOAymG4LuSwgDRM1CiFm4QI5hcRMZeEFlgwjDryl-JsFI/exec"; 
+// Fetch All Data and Export Combined Excel
+function fetchAndExportCombinedExcel() {
+  const btn = document.getElementById("fetchReportBtn");
+  btn.innerText = "⏳ डेटा सिंक होत आहे...";
+  btn.disabled = true;
+
+  // Make GET request to the Google Apps Script Web App
+  fetch(WEB_APP_URL)
+    .then(response => response.json())
+    .then(data => {
+      if(!data || data.length === 0) {
+        alert("कोणताही डेटा सापडला नाही.");
+        btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड";
+        btn.disabled = false;
+        return;
+      }
+
+      // Create a worksheet from JSON data (all rows)
+      const ws = XLSX.utils.json_to_sheet(data);
+
+      // Set Page Setup to A4 Landscape
+      ws['!pageSetup'] = { orientation: 'landscape', paperSize: 9 }; // 9 indicates A4 paper size
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "All_Schools_Data");
+      XLSX.writeFile(wb, "Combined_School_Report.xlsx");
+
+      btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड";
+      btn.disabled = false;
+      closeAdminModal();
+    })
+    .catch(error => {
+      alert("डेटा फेच करताना अडचण आली. कृपया खात्री करा की तुमची Google Apps Script 'doGet()' द्वारे JSON डेटा रिटर्न करत आहे.");
+      console.error("Fetch Error:", error);
+      btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड";
+      btn.disabled = false;
+    });
+}
 
 function submitOnline() {
   const schoolSelect = document.getElementById("schoolSelect");
