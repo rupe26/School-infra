@@ -170,7 +170,6 @@
   <button class="admin-icon" onclick="openAdminModal()" title="Admin Settings">⚙️</button>
 </header>
 
-<!-- Admin/Settings Modal -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal-content">
     <h3>⚙️ अॅडमिन सेटिंग्ज</h3>
@@ -189,7 +188,6 @@
     <h4 style="margin-top:0; color:var(--navy2);">सर्व शाळांचा एकत्रित रिपोर्ट</h4>
     <button type="button" class="excel-btn" id="fetchReportBtn" onclick="fetchAndExportCombinedExcel()" style="width:100%;">📥 डेटा सिंक व एक्सेल डाउनलोड</button>
     
-    <!-- नवीन PDF डाऊनलोड बटण -->
     <button type="button" class="print-btn" id="fetchPdfBtn" onclick="fetchAndExportCombinedPDF()" style="width:100%; margin-top:10px;">📄 डेटा सिंक व PDF डाउनलोड</button>
     
     <button type="button" onclick="closeAdminModal()" style="width:100%; background:#777; margin-top:15px;">❌ बंद करा</button>
@@ -489,7 +487,7 @@
           </div>
 
           <div class="field-group">
-            <span class="hint">२९. پرस बाग</span>
+            <span class="hint">२९. परस बाग</span>
             <select id="gardenAvail"><option>आहे</option><option>नाही</option></select>
           </div>
 
@@ -872,7 +870,7 @@ function fetchAndExportCombinedExcel() {
     });
 }
 
-// --- नवीन: सर्व ३३ प्रश्न व ८२ कॉलम्सचे A4 Landscape PDF डिझाईन ---
+// --- नवीन: सर्व ३३ प्रश्न, ८२ कॉलम्स आणि "प्रत्येक पानावर ५ शाळा" (Chunking logic) ---
 function fetchAndExportCombinedPDF() {
   const btn = document.getElementById("fetchPdfBtn");
   btn.innerText = "⏳ PDF तयार करत आहे...";
@@ -888,7 +886,6 @@ function fetchAndExportCombinedPDF() {
         return;
       }
 
-      // ८२ रकाने ६ मुख्य गटात विभागले आहेत.
       const sections = [
         {
           title: "१. शाळा, विद्यार्थी व कर्मचारी",
@@ -916,7 +913,6 @@ function fetchAndExportCombinedPDF() {
         }
       ];
 
-      // रकाण्यांची नावे लहान करण्यासाठी फंक्शन (जेणेकरून A4 मध्ये बसतील)
       function getShortHeader(k) {
         return k.replace("मुलींसाठी स्वच्छतागृह", "मुली स्व.")
                 .replace("मुलींसाठी मुतारी", "मुली मु.")
@@ -938,6 +934,47 @@ function fetchAndExportCombinedPDF() {
                 .replace("नवीन आवश्यक", "नवीन आव.");
       }
 
+      // प्रत्येक पानावरील सारणीचे हेडर (एकदाच बनवून ठेवणे)
+      const headersHtml = `
+        <tr>
+          ${sections.map(s => `<th class="main-th" colspan="${s.keys.length}">${s.title}</th>`).join('')}
+        </tr>
+        <tr>
+          ${sections.map(s => s.keys.map(k => {
+             let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
+             return `<th class="sub-th"><div class="${isText ? 'text-header' : 'vert'}">${getShortHeader(k)}</div></th>`;
+          }).join('')).join('')}
+        </tr>
+      `;
+
+      // डेटा ५-५ शाळांच्या गटात (Chunks) विभागणे
+      let pagesHtml = "";
+      for (let i = 0; i < data.length; i += 5) {
+        let chunk = data.slice(i, i + 5);
+        let pageNumber = Math.floor(i / 5) + 1;
+        
+        let rowsHtml = chunk.map(row => `
+          <tr>
+            ${sections.map(s => s.keys.map(k => {
+               let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
+               let val = row[k] !== undefined && row[k] !== null && row[k] !== "" ? row[k] : '-';
+               return `<td class="${isText ? 'text-cell' : 'num-cell'}">${val}</td>`;
+            }).join('')).join('')}
+          </tr>
+        `).join('');
+
+        // .page क्लास मुळे प्रत्येक टेबल नंतर नवीन पान येईल
+        pagesHtml += `
+          <div class="page">
+            <h2>शाळांची भौतिक सुविधा माहिती - एकत्रित अहवाल (पान ${pageNumber})</h2>
+            <table>
+              <thead>${headersHtml}</thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        `;
+      }
+
       let htmlContent = `
         <!DOCTYPE html>
         <html lang="mr">
@@ -946,48 +983,33 @@ function fetchAndExportCombinedPDF() {
           <title>सर्व शाळांचा एकत्रित अहवाल</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&display=swap');
-            @page { size: A4 landscape; margin: 4mm; }
-            body { font-family: 'Mukta', sans-serif; font-size: 5pt; color: #000; background: #fff; margin: 0; padding: 0; }
-            h2 { text-align: center; font-size: 11pt; margin: 4px 0; color: #1c2b4a; }
+            
+            @page { size: A4 landscape; margin: 6mm; }
+            body { font-family: 'Mukta', sans-serif; color: #000; background: #fff; margin: 0; padding: 0; }
+            h2 { text-align: center; font-size: 12pt; margin: 0 0 10px 0; color: #1c2b4a; }
+            
+            /* Page Break Logic */
+            .page { page-break-after: always; width: 100%; box-sizing: border-box; margin-bottom: 20px; }
+            .page:last-child { page-break-after: auto; margin-bottom: 0; }
+            
             table { width: 100%; border-collapse: collapse; table-layout: auto; }
-            th, td { border: 0.5px solid #333; padding: 1px 2px; text-align: center; vertical-align: middle; word-wrap: break-word; }
-            th { background-color: #f2f2f2; font-weight: 700; color: #000; }
-            .main-th { font-size: 6.5pt; padding: 2px; border-bottom: 1.5px solid #000; }
-            .sub-th { font-size: 5.5pt; height: 75px; }
+            th, td { border: 0.5px solid #222; padding: 1.5px; text-align: center; vertical-align: middle; word-wrap: break-word; }
+            th { background-color: #f0f0f0; color: #000; }
+            .main-th { font-size: 7pt; font-weight: 700; padding: 3px; border-bottom: 1.5px solid #000; }
+            .sub-th { height: 95px; }
             
-            /* Vertical Text Class */
-            .vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; padding: 1px; margin: 0 auto; }
+            .vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; font-size: 5.5pt; max-height: 85px; }
+            .text-header { font-size: 5.5pt; font-weight: 700; max-width: 45px; text-align: center; white-space: normal; }
             
-            .text-cell { text-align: left; min-width: 40px; max-width: 80px; font-size: 5pt; }
-            .num-cell { text-align: center; font-size: 5.5pt; }
+            .text-cell { text-align: left; font-size: 5.5pt; max-width: 70px; line-height: 1.2; }
+            .num-cell { text-align: center; font-size: 6pt; font-weight: 600; min-width: 12px; }
+            
+            /* समान उंची मिळवण्यासाठी */
+            tbody tr td { min-height: 25px; height: 35px; } 
           </style>
         </head>
         <body>
-          <h2>शाळांची भौतिक सुविधा माहिती - एकत्रित अहवाल</h2>
-          <table>
-            <thead>
-              <tr>
-                ${sections.map(s => `<th class="main-th" colspan="${s.keys.length}">${s.title}</th>`).join('')}
-              </tr>
-              <tr>
-                ${sections.map(s => s.keys.map(k => {
-                   let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
-                   return `<th class="sub-th"><div class="${isText ? '' : 'vert'}">${getShortHeader(k)}</div></th>`;
-                }).join('')).join('')}
-              </tr>
-            </thead>
-            <tbody>
-              ${data.map(row => `
-                <tr>
-                  ${sections.map(s => s.keys.map(k => {
-                     let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
-                     let val = row[k] !== undefined && row[k] !== null && row[k] !== "" ? row[k] : '-';
-                     return `<td class="${isText ? 'text-cell' : 'num-cell'}">${val}</td>`;
-                  }).join('')).join('')}
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+          ${pagesHtml}
           <script>
             window.onload = function() { 
               setTimeout(function() { window.print(); }, 1000);
