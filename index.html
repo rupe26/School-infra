@@ -66,7 +66,7 @@
 
   .status-badge { margin-top: 6px; font-size: 0.85rem; font-weight: 700; padding: 6px 10px; border-radius: 6px; display: none; }
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-  .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; }
+  .modal-content { background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; max-height: 90vh; overflow-y: auto;}
   .modal-content h3 { margin-top: 0; color: var(--navy); }
 </style>
 </head>
@@ -109,7 +109,7 @@
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
     <h4 style="margin-top:0; color:var(--navy2);">सर्व शाळांचा एकत्रित रिपोर्ट</h4>
     <button type="button" class="excel-btn" id="fetchReportBtn" onclick="fetchAndExportCombinedExcel()" style="width:100%;">📥 डेटा सिंक व एक्सेल डाउनलोड</button>
-    <button type="button" class="print-btn" id="fetchPdfBtn" onclick="fetchAndExportCombinedPDF()" style="width:100%; margin-top:10px;">📄 डेटा सिंक व PDF डाउनलोड</button>
+    <button type="button" class="print-btn" id="fetchPdfBtn" onclick="fetchAndExportCombinedPDF()" style="width:100%; margin-top:10px;">📄 डेटा सिंक व एकत्रित PDF डाउनलोड</button>
     
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
     <h4 style="margin-top:0; color:var(--navy2);">🔑 PIN बदला (Reset PIN)</h4>
@@ -120,7 +120,12 @@
     <p id="resetPinMsg" style="display:none; font-size:0.85rem; margin-top:5px; margin-bottom:5px; font-weight:bold;"></p>
     <button type="button" id="resetPinBtn" onclick="resetAdminPin()" style="width:100%; background:#d93025; margin-top:10px;">🔄 PIN अपडेट करा</button>
 
-    <button type="button" onclick="closeAdminModal()" style="width:100%; background:#777; margin-top:15px;">❌ बंद करा</button>
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 15px 0;">
+    
+    <!-- NEW LOG OUT BUTTON -->
+    <button type="button" onclick="logoutAdmin()" style="width:100%; background:#f29900; color:#fff; border:none; margin-bottom:10px;">🚪 लॉग आउट (Log Out)</button>
+    
+    <button type="button" onclick="closeAdminModal()" style="width:100%; background:#777;">❌ बंद करा</button>
   </div>
 </div>
 
@@ -430,6 +435,22 @@ function openAdminFlow() {
 function closePinModal() { document.getElementById('pinModal').style.display = 'none'; }
 function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
 
+// नवीन: लॉग आउट फंक्शन
+function logoutAdmin() {
+  isAdminLoggedIn = false;
+  closeAdminModal();
+  
+  // जर एखादी शाळा निवडली असेल तर फॉर्म पुन्हा लॉक करा
+  if(document.getElementById("schoolSelect").value !== "") {
+    applyLockState(true);
+    const statusEl = document.getElementById("fetchStatus");
+    statusEl.innerText = "🔒 माहिती एडिट करण्यासाठी फॉर्म लॉक आहे. (Admin Login करा)";
+    statusEl.style.background = "#fce8e6";
+    statusEl.style.color = "#c5221f";
+  }
+  alert("तुम्ही यशस्वीरित्या लॉग आउट झाला आहात.");
+}
+
 async function verifyAdminPin() {
   const pin = document.getElementById('pinInput').value;
   if (!pin) return;
@@ -446,7 +467,6 @@ async function verifyAdminPin() {
       closePinModal();
       openAdminFlow();
       
-      // जर एखादी शाळा आधीच निवडली असेल तर फॉर्म अनलॉक करा
       if(document.getElementById("schoolSelect").value !== "") {
          applyLockState(false);
          document.getElementById("fetchStatus").innerText = "🔓 माहिती एडिट करण्यासाठी फॉर्म खुला आहे (Admin).";
@@ -512,11 +532,8 @@ function applyDefaultOfficer() {
 
 // ---------------- Form Lock/Unlock Logic ---------------- //
 function applyLockState(isLocked) {
-  // शाळेचे नाव वगळता इतर सर्व बॉक्स लॉक/अनलॉक करणे
   const elements = document.querySelectorAll('#infraForm input:not(#otherSchoolName), #infraForm select:not(#schoolSelect), #infraForm textarea');
-  elements.forEach(el => {
-    el.disabled = isLocked;
-  });
+  elements.forEach(el => { el.disabled = isLocked; });
 
   const submitBtn = document.getElementById("onlineSubmitBtn");
   submitBtn.disabled = isLocked;
@@ -618,7 +635,6 @@ async function checkAndFetchSchoolData(schoolName, udise) {
     if (matchedRows.length > 0) {
       populateFormData(matchedRows[matchedRows.length - 1]);
       
-      // जर Admin नसेल तर फॉर्म लॉक करा
       if (!isAdminLoggedIn) {
         applyLockState(true);
         statusEl.style.background = "#fce8e6";
@@ -796,13 +812,174 @@ function fetchAndExportCombinedExcel() {
     }).catch(e => { alert("अडचण आली."); btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड"; btn.disabled = false; });
 }
 
+// --- सर्व शाळांचा एकत्रित PDF (Full working code from previous iterations) ---
 function fetchAndExportCombinedPDF() {
   const btn = document.getElementById("fetchPdfBtn");
-  btn.innerText = "⏳ PDF तयार करत आहे..."; btn.disabled = true;
-  // (हा कोड आधीच्या उदाहरणाप्रमाणे सर्व शाळांची A4 PDF तयार करतो)
-  // ...
-  alert("हा कोड लांब असल्यामुळे PDF डाऊनलोड फीचर फक्त एका शाळेसाठी सध्या सक्रिय आहे (वर प्रिंट बटण वापरा). एकत्रित PDF साठी मागील कोडमधील PDF लॉजिक लागू राहील.");
-  btn.innerText = "📄 डेटा सिंक व PDF डाउनलोड"; btn.disabled = false; closeAdminModal();
+  btn.innerText = "⏳ PDF तयार करत आहे...";
+  btn.disabled = true;
+
+  fetch(WEB_APP_URL)
+    .then(response => response.json())
+    .then(data => {
+      if(!data || data.length === 0) {
+        alert("कोणताही डेटा सापडला नाही.");
+        btn.innerText = "📄 डेटा सिंक व एकत्रित PDF डाउनलोड";
+        btn.disabled = false;
+        return;
+      }
+      ALL_ONLINE_DATA = data; 
+
+      const sectionsPart1 = [
+        {
+          title: "१. शाळा, विद्यार्थी व कर्मचारी",
+          keys: ["शाळेचे नाव", "युडायस (U-DISE) नंबर", "शाळेचा प्रकार", "शाळेच्या जागेची मालकी", "मुख्याध्यापक यांचे नाव", "मुख्याध्यापकांचा मोबाईल क्रमांक", "पीएमश्री / आदर्श योजना", "योजनेचे नाव", "विद्यार्थी संख्या (मुले)", "विद्यार्थी संख्या (मुली)", "विद्यार्थी संख्या (एकूण)", "शिक्षक (मान्य पदे)", "शिक्षक (कार्यरत पदे)"]
+        },
+        {
+          title: "२. वर्गखोल्या",
+          keys: ["वर्गखोल्या (सुस्थितीत)", "वर्गखोल्या (दुरुस्ती आवश्यक)", "वर्गखोल्या (धोकादायक)", "दुरुस्ती आवश्यक रक्कम (₹)", "वर्गखोल्या निर्लेखन प्रस्ताव", "नवीन आवश्यक वर्गखोल्या"]
+        },
+        {
+          title: "३. स्वच्छतागृह (WASH) व पाणी",
+          keys: ["मुलींसाठी स्वच्छतागृह (एकूण)", "मुलींसाठी स्वच्छतागृह (वापरात)", "मुलींसाठी स्वच्छतागृह (नादुरुस्त)", "मुलींसाठी स्वच्छतागृह (धोकादायक)", "मुलींसाठी स्वच्छतागृह (आवश्यक)", "मुलींसाठी स्वच्छतागृह (निर्लेखन)", "मुलींसाठी मुतारी (एकूण)", "मुलींसाठी मुतारी (वापरात)", "मुलींसाठी मुतारी (नादुरुस्त)", "मुलींसाठी मुतारी (धोकादायक)", "मुलींसाठी मुतारी (आवश्यक)", "मुलींसाठी मुतारी (निर्लेखन)", "मुलांसाठी स्वच्छतागृह (एकूण)", "मुलांसाठी स्वच्छतागृह (वापरात)", "मुलांसाठी स्वच्छतागृह (नादुरुस्त)", "मुलांसाठी स्वच्छतागृह (धोकादायक)", "मुलांसाठी स्वच्छतागृह (आवश्यक)", "मुलांसाठी स्वच्छतागृह (निर्लेखन)", "मुलांसाठी मुतारी (एकूण)", "मुलांसाठी मुतारी (वापरात)", "मुलांसाठी मुतारी (नादुरुस्त)", "मुलांसाठी मुतारी (धोकादायक)", "मुलांसाठी मुतारी (आवश्यक)", "मुलांसाठी मुतारी (निर्लेखन)", "दिव्यांगासाठी स्वच्छतागृह (एकूण)", "दिव्यांगासाठी स्वच्छतागृह (वापरात)", "दिव्यांगासाठी स्वच्छतागृह (नादुरुस्त)", "दिव्यांगासाठी स्वच्छतागृह (धोकादायक)", "दिव्यांगासाठी स्वच्छतागृह (आवश्यक)", "दिव्यांगासाठी स्वच्छतागृह (निर्लेखन)", "स्वच्छतागृहासाठी पाणी", "कमोड चेअर व्यवस्था", "पिण्याच्या पाण्याची व्यवस्था", "वॉटर फिल्टर"]
+        }
+      ];
+
+      const sectionsPart2 = [
+        {
+          title: "शाळेची ओळख",
+          keys: ["शाळेचे नाव"] 
+        },
+        {
+          title: "४. वीज व सुविधा",
+          keys: ["विद्युत मीटर", "ग्राहक क्रमांक", "विद्युत बिल थकीत रक्कम (₹)", "लाईट फिटींग पूर्ण खोल्या", "लाईट फिटींग आवश्यक खोल्या", "सोलर पॅनल", "रॅम्प स्थिती", "किचन शेड स्थिती", "किचन शेड दुरुस्ती रक्कम/प्रस्ताव", "अग्निशमन यंत्र", "संरक्षण भिंत प्रकार", "संरक्षण भिंत स्थिती", "क्रीडांगण उपलब्धता", "क्रीडांगण क्षेत्रफळ"]
+        },
+        {
+          title: "५. शैक्षणिक व इतर",
+          keys: ["संगणक प्रयोगशाळा", "विज्ञान प्रयोगशाळा", "डिजीटल साहित्य", "लायब्ररी", "वायफाय सुविधा", "बोलक्या भिंती", "परस बाग", "खेळासाठी साहित्य", "शिष्यवृत्ती सहभाग विद्यार्थी", "शिष्यवृत्ती पात्र विद्यार्थी", "विशेष उपक्रम"]
+        },
+        {
+          title: "६. पडताळणी",
+          keys: ["अभिप्राय", "भेट दिनांक", "अधिकाऱ्याचे नाव", "हुद्दा"]
+        }
+      ];
+
+      function getShortHeader(k) {
+        return k.replace("मुलींसाठी स्वच्छतागृह", "मुली स्व.")
+                .replace("मुलींसाठी मुतारी", "मुली मु.")
+                .replace("मुलांसाठी स्वच्छतागृह", "मुले स्व.")
+                .replace("मुलांसाठी मुतारी", "मुले मु.")
+                .replace("दिव्यांगासाठी स्वच्छतागृह", "दिव्यांग स्व.")
+                .replace("विद्यार्थी संख्या", "विद्यार्थी")
+                .replace("वर्गखोल्या", "खोल्या")
+                .replace(" (₹)", "")
+                .replace("शिक्षक (मान्य पदे)", "मान्य शिक्षक")
+                .replace("शिक्षक (कार्यरत पदे)", "कार्यरत शिक्षक")
+                .replace("पिण्याच्या पाण्याची व्यवस्था", "पिण्याचे पाणी")
+                .replace("स्वच्छतागृहासाठी पाणी", "स्व. पाणी")
+                .replace("क्रीडांगण", "मैदान")
+                .replace("युडायस (U-DISE) नंबर", "U-DISE")
+                .replace("मुख्याध्यापकांचा मोबाईल क्रमांक", "मुख्या. मोबाईल")
+                .replace("दुरुस्ती आवश्यक", "दुरुस्ती आव.")
+                .replace("निर्लेखन प्रस्ताव", "निर्लेखन")
+                .replace("नवीन आवश्यक", "नवीन आव.");
+      }
+
+      function generateTable(sections, chunkData) {
+        const headersHtml = `
+          <tr>
+            ${sections.map(s => `<th class="main-th" colspan="${s.keys.length}">${s.title}</th>`).join('')}
+          </tr>
+          <tr>
+            ${sections.map(s => s.keys.map(k => {
+               let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
+               return `<th class="sub-th"><div class="${isText ? 'text-header' : 'vert'}">${getShortHeader(k)}</div></th>`;
+            }).join('')).join('')}
+          </tr>
+        `;
+
+        const rowsHtml = chunkData.map(row => `
+          <tr>
+            ${sections.map(s => s.keys.map(k => {
+               let isText = k.includes("नाव") || k.includes("मालकी") || k.includes("प्रकार") || k.includes("उपक्रम") || k.includes("अभिप्राय") || k.includes("हुद्दा") || k.includes("दिनांक") || k === "शाळेचे नाव";
+               let val = row[k] !== undefined && row[k] !== null && row[k] !== "" ? row[k] : '-';
+               return `<td class="${isText ? 'text-cell' : 'num-cell'}">${val}</td>`;
+            }).join('')).join('')}
+          </tr>
+        `).join('');
+
+        return `<table><thead>${headersHtml}</thead><tbody>${rowsHtml}</tbody></table>`;
+      }
+
+      let pagesHtml = "";
+      for (let i = 0; i < data.length; i += 5) {
+        let chunk = data.slice(i, i + 5);
+        let pageNumber = Math.floor(i / 5) + 1;
+        
+        pagesHtml += `
+          <div class="page">
+            <h2>शाळांची भौतिक सुविधा माहिती - भाग १ (पान ${pageNumber})</h2>
+            ${generateTable(sectionsPart1, chunk)}
+            
+            <div class="table-gap"></div>
+
+            <h2>शाळांची भौतिक सुविधा माहिती - भाग २ (पान ${pageNumber})</h2>
+            ${generateTable(sectionsPart2, chunk)}
+          </div>
+        `;
+      }
+
+      let htmlContent = `
+        <!DOCTYPE html>
+        <html lang="mr">
+        <head>
+          <meta charset="UTF-8">
+          <title>सर्व शाळांचा एकत्रित अहवाल</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&display=swap');
+            @page { size: A4 landscape; margin: 6mm; }
+            body { font-family: 'Mukta', sans-serif; color: #000; background: #fff; margin: 0; padding: 0; }
+            h2 { text-align: center; font-size: 11pt; margin: 0 0 6px 0; color: #1c2b4a; }
+            .page { page-break-after: always; width: 100%; box-sizing: border-box; }
+            .page:last-child { page-break-after: auto; }
+            table { width: 100%; border-collapse: collapse; table-layout: auto; margin-bottom: 5px; }
+            th, td { border: 0.5px solid #222; padding: 2px; text-align: center; vertical-align: middle; word-wrap: break-word; }
+            th { background-color: #f0f0f0; color: #000; }
+            .main-th { font-size: 8pt; font-weight: 700; padding: 3px; border-bottom: 1.5px solid #000; }
+            .sub-th { height: 90px; }
+            .vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; font-size: 6pt; max-height: 85px; }
+            .text-header { font-size: 6.5pt; font-weight: 700; max-width: 60px; text-align: center; white-space: normal; }
+            .text-cell { text-align: left; font-size: 6.5pt; max-width: 80px; line-height: 1.2; }
+            .num-cell { text-align: center; font-size: 7pt; font-weight: 600; min-width: 14px; }
+            tbody tr td { min-height: 25px; height: 30px; } 
+            .table-gap { height: 15px; } 
+          </style>
+        </head>
+        <body>
+          ${pagesHtml}
+          <script>
+            window.onload = function() { 
+              setTimeout(function() { window.print(); }, 1000);
+            }
+          <\/script>
+        </body>
+        </html>
+      `;
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+
+      btn.innerText = "📄 डेटा सिंक व एकत्रित PDF डाउनलोड";
+      btn.disabled = false;
+      closeAdminModal();
+    })
+    .catch(error => {
+      alert("डेटा फेच करताना अडचण आली.");
+      console.error("Fetch Error:", error);
+      btn.innerText = "📄 डेटा सिंक व एकत्रित PDF डाउनलोड";
+      btn.disabled = false;
+    });
 }
 
 function submitOnline() {
