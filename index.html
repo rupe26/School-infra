@@ -149,6 +149,7 @@
   button:hover { opacity: 0.9; }
   .excel-btn { background: #217346; } 
   .online-btn { background: #d93025; } 
+  .print-btn { background: var(--navy2); }
 
   /* Modal Styling */
   .modal-overlay {
@@ -187,6 +188,9 @@
     
     <h4 style="margin-top:0; color:var(--navy2);">सर्व शाळांचा एकत्रित रिपोर्ट</h4>
     <button type="button" class="excel-btn" id="fetchReportBtn" onclick="fetchAndExportCombinedExcel()" style="width:100%;">📥 डेटा सिंक व एक्सेल डाउनलोड</button>
+    
+    <!-- नवीन PDF डाऊनलोड बटण -->
+    <button type="button" class="print-btn" id="fetchPdfBtn" onclick="fetchAndExportCombinedPDF()" style="width:100%; margin-top:10px;">📄 डेटा सिंक व PDF डाउनलोड</button>
     
     <button type="button" onclick="closeAdminModal()" style="width:100%; background:#777; margin-top:15px;">❌ बंद करा</button>
   </div>
@@ -604,7 +608,7 @@ const TEACHERS_DATA = {
   "जि.प.प्रा.शा. पिंपळा धायगुडा (मराठी)": [ "भैय्यासाहेब तुकाराम जोगदंड", "प्रीती सुभाषचंद्र साहू", "संजीव कचरू उमाप", "गंगू मुरलीधर झाडे", "सुरेखा उमाकांत हिशोबे", "ज्योतीराम कोंडीबा कोल्हापुरे", "सीमा सखारामराव कदम", "विलास रामराव माचवे" ],
   "जि.प.प्रा.शा. पिंपळा धायगुडा (उर्दू)": [ "सय्यदा हिना सय्यद सरफराजोद्दीन", "दायमी सय्यदा नुरुलहुदा अमीरोद्दीन", "खालीद हसनसाब सय्यद", "गौसिया बेगम अब्दुल अजीज शेख" ],
   "जि.प.प्रा.शा. वरवटी": [ "ज्योतीबाई देवीदासराव शिंदे", "श्री सायस साखरोबा गर्जे" ],
-  "जि.प.प्रा.शा. उघडे वस्ती (वरवटी)": [ "रविकांत सुधाकरराव खेपकर", "शोभा अंगदराव चाटे" ],
+  "जि.प.प्रा.शा. उघडे वस्ती (वरवटी)": [ "रविकांत सुधाकरराव বাধकर", "शोभा अंगदराव चाटे" ],
   "जि.प.प्रा.शा. तलाव पाटी": [ "मनीषा धोंडोपंत चिंचोलीकर", "श्रीदेवी मनोहर सिरसाट" ],
   "जि.प.प्रा.शा. अंबलवाडी": [ "नवतीला रामराव जाधव", "भगवान आश्रुबा बिल्पे", "आनंद पांडुरंग सिरसाट", "रुक्मिणी हरिश्चंद्र दाभाडे" ],
   "जि. प. प्रा.शा. गोल्टावस्ती": [ "सुरेखा अभिमान गालफाडे", "शालन नागनाथ जोगदंड" ],
@@ -691,7 +695,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Dependent Inputs Block Logic 
-  // (Including Compound Wall Logic)
   const dependencies = [
     { select: "isPmShri", input: "pmShriName", condition: (val) => val === "आहे" },
     { select: "elecMeter", input: "elecConsumer", condition: (val) => val === "आहे" },
@@ -701,7 +704,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { select: "digiMatAvail", input: "digiMatCount", condition: (val) => val === "आहे" },
     { select: "wallPaintAvail", input: "wallPaintCount", condition: (val) => val === "आहे" },
     { select: "playMatAvail", input: "playMatDesc", condition: (val) => val === "आहे" },
-    { select: "wallType", input: "wallStatus", condition: (val) => val !== "नाही" } // जर संरक्षण भिंत 'नाही' असेल तर 'स्थिती' ब्लॉक करा
+    { select: "wallType", input: "wallStatus", condition: (val) => val !== "नाही" } 
   ];
 
   dependencies.forEach(dep => {
@@ -878,7 +881,6 @@ function fetchAndExportCombinedExcel() {
   btn.innerText = "⏳ डेटा सिंक होत आहे...";
   btn.disabled = true;
 
-  // Make GET request to the Google Apps Script Web App
   fetch(WEB_APP_URL)
     .then(response => response.json())
     .then(data => {
@@ -889,12 +891,8 @@ function fetchAndExportCombinedExcel() {
         return;
       }
 
-      // Create a worksheet from JSON data (all rows)
       const ws = XLSX.utils.json_to_sheet(data);
-
-      // Set Page Setup to A4 Landscape
-      ws['!pageSetup'] = { orientation: 'landscape', paperSize: 9 }; // 9 indicates A4 paper size
-
+      ws['!pageSetup'] = { orientation: 'landscape', paperSize: 9 }; 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "All_Schools_Data");
       XLSX.writeFile(wb, "Combined_School_Report.xlsx");
@@ -904,9 +902,85 @@ function fetchAndExportCombinedExcel() {
       closeAdminModal();
     })
     .catch(error => {
-      alert("डेटा फेच करताना अडचण आली. कृपया खात्री करा की तुमची Google Apps Script 'doGet()' द्वारे JSON डेटा रिटर्न करत आहे.");
+      alert("डेटा फेच करताना अडचण आली.");
       console.error("Fetch Error:", error);
       btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड";
+      btn.disabled = false;
+    });
+}
+
+// --- नवीन: सर्व शाळांचा एकत्रित PDF रिपोर्ट बनवणे ---
+function fetchAndExportCombinedPDF() {
+  const btn = document.getElementById("fetchPdfBtn");
+  btn.innerText = "⏳ PDF तयार करत आहे...";
+  btn.disabled = true;
+
+  fetch(WEB_APP_URL)
+    .then(response => response.json())
+    .then(data => {
+      if(!data || data.length === 0) {
+        alert("कोणताही डेटा सापडला नाही.");
+        btn.innerText = "📄 डेटा सिंक व PDF डाउनलोड";
+        btn.disabled = false;
+        return;
+      }
+
+      // टेबल हेडर्स बनवणे (पहिल्या रो वरून)
+      const headers = Object.keys(data[0]);
+      
+      // HTML प्रिंट लेआउट बनवणे (A4 Landscape)
+      let htmlContent = `
+        <!DOCTYPE html>
+        <html lang="mr">
+        <head>
+          <meta charset="UTF-8">
+          <title>सर्व शाळांचा एकत्रित अहवाल</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&display=swap');
+            @page { size: A4 landscape; margin: 10mm; }
+            body { font-family: 'Mukta', sans-serif; font-size: 8pt; color: #000; background: #fff; }
+            h2 { text-align: center; font-size: 14pt; margin-bottom: 20px; color: #1c2b4a; }
+            table { width: 100%; border-collapse: collapse; table-layout: auto; }
+            th, td { border: 1px solid #777; padding: 4px; text-align: left; word-wrap: break-word; }
+            th { background-color: #eaf0fb; font-weight: 700; color: #1c2b4a; font-size: 9pt; }
+            tr { page-break-inside: avoid; }
+            thead { display: table-header-group; }
+          </style>
+        </head>
+        <body>
+          <h2>सर्व शाळांची भौतिक सुविधा माहिती - एकत्रित अहवाल</h2>
+          <table>
+            <thead>
+              <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+            </thead>
+            <tbody>
+              ${data.map(row => `<tr>${headers.map(h => `<td>${row[h] !== null ? row[h] : ''}</td>`).join('')}</tr>`).join('')}
+            </tbody>
+          </table>
+          <script>
+            // पान लोड झाल्यावर आपोआप प्रिंट डायलॉग ओपन होईल
+            window.onload = function() { 
+              setTimeout(function() { window.print(); }, 500);
+            }
+          <\/script>
+        </body>
+        </html>
+      `;
+
+      // नवीन टॅब/विंडो उघडणे व त्यात HTML भरणे
+      const printWindow = window.open('', '_blank');
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+
+      btn.innerText = "📄 डेटा सिंक व PDF डाउनलोड";
+      btn.disabled = false;
+      closeAdminModal();
+    })
+    .catch(error => {
+      alert("डेटा फेच करताना अडचण आली.");
+      console.error("Fetch Error:", error);
+      btn.innerText = "📄 डेटा सिंक व PDF डाउनलोड";
       btn.disabled = false;
     });
 }
