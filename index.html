@@ -71,7 +71,6 @@
   details.section[open] > summary:after { transform: rotate(180deg); }
   
   .section-body { padding: 16px; }
-  
   .field-group { margin-bottom: 16px; }
   
   .sub-card {
@@ -151,7 +150,11 @@
   .online-btn { background: #d93025; } 
   .print-btn { background: var(--navy2); }
 
-  /* Modal Styling */
+  .status-badge {
+    margin-top: 6px; font-size: 0.85rem; font-weight: 700;
+    padding: 6px 10px; border-radius: 6px; display: none;
+  }
+
   .modal-overlay {
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;
@@ -170,6 +173,7 @@
   <button class="admin-icon" onclick="openAdminModal()" title="Admin Settings">⚙️</button>
 </header>
 
+<!-- Admin Modal -->
 <div class="modal-overlay" id="adminModal">
   <div class="modal-content">
     <h3>⚙️ अॅडमिन सेटिंग्ज</h3>
@@ -187,17 +191,13 @@
     
     <h4 style="margin-top:0; color:var(--navy2);">सर्व शाळांचा एकत्रित रिपोर्ट</h4>
     <button type="button" class="excel-btn" id="fetchReportBtn" onclick="fetchAndExportCombinedExcel()" style="width:100%;">📥 डेटा सिंक व एक्सेल डाउनलोड</button>
-    
     <button type="button" class="print-btn" id="fetchPdfBtn" onclick="fetchAndExportCombinedPDF()" style="width:100%; margin-top:10px;">📄 डेटा सिंक व PDF डाउनलोड</button>
-    
     <button type="button" onclick="closeAdminModal()" style="width:100%; background:#777; margin-top:15px;">❌ बंद करा</button>
   </div>
 </div>
 
 <main>
   <form id="infraForm" onsubmit="event.preventDefault();">
-    
-    <!-- उर्वरित सर्व HTML फॉर्म जसाच्या तसा आहे (कोणताही बदल नाही) -->
     
     <details class="section" open>
       <summary>१. शाळा, विद्यार्थी व कर्मचारी</summary>
@@ -206,6 +206,7 @@
         <div class="field-group">
           <label>१. शाळेचे नाव *</label>
           <select id="schoolSelect" required></select>
+          <div id="fetchStatus" class="status-badge"></div>
         </div>
 
         <div class="field-group" id="otherSchoolGroup" style="display: none;">
@@ -494,7 +495,7 @@
           </div>
 
           <div class="grid-2">
-            <div><span class="hint">३0. खेळासाठी साहित्य</span><select id="playMatAvail"><option>आहे</option><option>नाही</option></select></div>
+            <div><span class="hint">३०. खेळासाठी साहित्य</span><select id="playMatAvail"><option>आहे</option><option>नाही</option></select></div>
             <div><span class="hint">साहित्याचे विवरण</span><input type="text" id="playMatDesc"></div>
           </div>
 
@@ -534,7 +535,7 @@
 
     <div class="toolbar">
       <button type="button" class="excel-btn" onclick="exportToExcel()">📊 एक शाळा Excel</button>
-      <button type="button" class="online-btn" id="onlineSubmitBtn" onclick="submitOnline()">☁️ सबमिट</button>
+      <button type="button" class="online-btn" id="onlineSubmitBtn" onclick="submitOnline()">☁️ सबमिट / अपडेट</button>
     </div>
   </form>
 </main>
@@ -617,6 +618,9 @@ const TEACHERS_DATA = {
 
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxiHlIKs8U5jGgSFqN0ZokOAymG4LuSwgDRM1CiFm4QI5hcRMZeEFlgwjDryl-JsFI/exec"; 
 
+// फाईल लोड झाल्यावर सर्व डेटा एकदाच कॅश (Cache) मध्ये ठेवण्यासाठी व्हेरिएबल
+let ALL_ONLINE_DATA = [];
+
 function openAdminModal() {
   document.getElementById('adminModal').style.display = 'flex';
   document.getElementById('adminOffName').value = localStorage.getItem('defaultOfficerName') || '';
@@ -640,8 +644,208 @@ function saveAdminSettings() {
 function applyDefaultOfficer() {
   const n = localStorage.getItem('defaultOfficerName');
   const d = localStorage.getItem('defaultOfficerDesignation');
-  if(n) document.getElementById('officerName').value = n;
-  if(d) document.getElementById('officerDesignation').value = d;
+  if(n && !document.getElementById('officerName').value) document.getElementById('officerName').value = n;
+  if(d && !document.getElementById('officerDesignation').value) document.getElementById('officerDesignation').value = d;
+}
+
+// फॉर्ममधील बदल रिसेट करण्याचे फंक्शन
+function resetFormFields() {
+  const idsToClear = [
+    "landOwnership", "hmMobile", "isPmShri", "pmShriName", "stuBoys", "stuGirls", "stuTotal",
+    "teacherSanctioned", "classGood", "classRepair", "classDanger", "classRepairCost", "classWriteoff", "classNewReq",
+    "toiletGirlTotal", "toiletGirlUse", "toiletGirlBad", "toiletGirlDanger", "toiletGirlReq", "toiletGirlWriteoff",
+    "urinalGirlTotal", "urinalGirlUse", "urinalGirlBad", "urinalGirlDanger", "urinalGirlReq", "urinalGirlWriteoff",
+    "toiletBoyTotal", "toiletBoyUse", "toiletBoyBad", "toiletBoyDanger", "toiletBoyReq", "toiletBoyWriteoff",
+    "urinalBoyTotal", "urinalBoyUse", "urinalBoyBad", "urinalBoyDanger", "urinalBoyReq", "urinalBoyWriteoff",
+    "toiletCwsnTotal", "toiletCwsnUse", "toiletCwsnBad", "toiletCwsnDanger", "toiletCwsnReq", "toiletCwsnWriteoff",
+    "toiletWater", "cwsnCommode", "drinkWater", "waterFilter", "elecMeter", "elecConsumer", "elecDues", "lightDone", "lightReq",
+    "solarPanel", "rampStatus", "kitchenStatus", "kitchenCost", "fireExt", "wallType", "wallStatus", "playgroundAvail",
+    "playgroundArea", "compLabAvail", "compLabCount", "sciLabAvail", "digiMatAvail", "digiMatCount", "libAvail", "wifiAvail",
+    "wallPaintAvail", "wallPaintCount", "gardenAvail", "playMatAvail", "playMatDesc", "scholPart", "scholPass", "specAct",
+    "officerFeedback", "visitDate"
+  ];
+  idsToClear.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) {
+      if(el.tagName === 'SELECT') el.selectedIndex = 0;
+      else if(el.type === 'number') el.value = "0";
+      else el.value = "";
+    }
+  });
+  applyDefaultOfficer();
+  triggerAllDependencies();
+}
+
+// सर्व डिपेंडंट फील्ड्स तपासणे
+function triggerAllDependencies() {
+  ["isPmShri", "elecMeter", "playgroundAvail", "compLabAvail", "digiMatAvail", "wallPaintAvail", "playMatAvail", "wallType"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.dispatchEvent(new Event("change"));
+  });
+  calcTotalStudents();
+}
+
+// गुगल शीटवरून आलेला डेटा फॉर्ममध्ये भरणे
+function populateFormData(row) {
+  const FIELD_MAP = {
+    "शाळेचा प्रकार": "schoolType",
+    "शाळेच्या जागेची मालकी": "landOwnership",
+    "मुख्याध्यापक यांचे नाव": "hmName",
+    "मुख्याध्यापकांचा मोबाईल क्रमांक": "hmMobile",
+    "पीएमश्री / आदर्श योजना": "isPmShri",
+    "योजनेचे नाव": "pmShriName",
+    "विद्यार्थी संख्या (मुले)": "stuBoys",
+    "विद्यार्थी संख्या (मुली)": "stuGirls",
+    "शिक्षक (मान्य पदे)": "teacherSanctioned",
+    "शिक्षक (कार्यरत पदे)": "teacherWorking",
+    "वर्गखोल्या (सुस्थितीत)": "classGood",
+    "वर्गखोल्या (दुरुस्ती आवश्यक)": "classRepair",
+    "वर्गखोल्या (धोकादायक)": "classDanger",
+    "दुरुस्ती आवश्यक रक्कम (₹)": "classRepairCost",
+    "वर्गखोल्या निर्लेखन प्रस्ताव": "classWriteoff",
+    "नवीन आवश्यक वर्गखोल्या": "classNewReq",
+    "मुलींसाठी स्वच्छतागृह (एकूण)": "toiletGirlTotal",
+    "मुलींसाठी स्वच्छतागृह (वापरात)": "toiletGirlUse",
+    "मुलींसाठी स्वच्छतागृह (नादुरुस्त)": "toiletGirlBad",
+    "मुलींसाठी स्वच्छतागृह (धोकादायक)": "toiletGirlDanger",
+    "मुलींसाठी स्वच्छतागृह (आवश्यक)": "toiletGirlReq",
+    "मुलींसाठी स्वच्छतागृह (निर्लेखन)": "toiletGirlWriteoff",
+    "मुलींसाठी मुतारी (एकूण)": "urinalGirlTotal",
+    "मुलींसाठी मुतारी (वापरात)": "urinalGirlUse",
+    "मुलींसाठी मुतारी (नादुरुस्त)": "urinalGirlBad",
+    "मुलींसाठी मुतारी (धोकादायक)": "urinalGirlDanger",
+    "मुलींसाठी मुतारी (आवश्यक)": "urinalGirlReq",
+    "मुलींसाठी मुतारी (निर्लेखन)": "urinalGirlWriteoff",
+    "मुलांसाठी स्वच्छतागृह (एकूण)": "toiletBoyTotal",
+    "मुलांसाठी स्वच्छतागृह (वापरात)": "toiletBoyUse",
+    "मुलांसाठी स्वच्छतागृह (नादुरुस्त)": "toiletBoyBad",
+    "मुलांसाठी स्वच्छतागृह (धोकादायक)": "toiletBoyDanger",
+    "मुलांसाठी स्वच्छतागृह (आवश्यक)": "toiletBoyReq",
+    "मुलांसाठी स्वच्छतागृह (निर्लेखन)": "toiletBoyWriteoff",
+    "मुलांसाठी मुतारी (एकूण)": "urinalBoyTotal",
+    "मुलांसाठी मुतारी (वापरात)": "urinalBoyUse",
+    "मुलांसाठी मुतारी (नादुरुस्त)": "urinalBoyBad",
+    "मुलांसाठी मुतारी (धोकादायक)": "urinalBoyDanger",
+    "मुलांसाठी मुतारी (आवश्यक)": "urinalBoyReq",
+    "मुलांसाठी मुतारी (निर्लेखन)": "urinalBoyWriteoff",
+    "दिव्यांगासाठी स्वच्छतागृह (एकूण)": "toiletCwsnTotal",
+    "दिव्यांगासाठी स्वच्छतागृह (वापरात)": "toiletCwsnUse",
+    "दिव्यांगासाठी स्वच्छतागृह (नादुरुस्त)": "toiletCwsnBad",
+    "दिव्यांगासाठी स्वच्छतागृह (धोकादायक)": "toiletCwsnDanger",
+    "दिव्यांगासाठी स्वच्छतागृह (आवश्यक)": "toiletCwsnReq",
+    "दिव्यांगासाठी स्वच्छतागृह (निर्लेखन)": "toiletCwsnWriteoff",
+    "स्वच्छतागृहासाठी पाणी": "toiletWater",
+    "कमोड चेअर व्यवस्था": "cwsnCommode",
+    "पिण्याच्या पाण्याची व्यवस्था": "drinkWater",
+    "वॉटर फिल्टर": "waterFilter",
+    "विद्युत मीटर": "elecMeter",
+    "ग्राहक क्रमांक": "elecConsumer",
+    "विद्युत बिल थकीत रक्कम (₹)": "elecDues",
+    "लाईट फिटींग पूर्ण खोल्या": "lightDone",
+    "लाईट फिटींग आवश्यक खोल्या": "lightReq",
+    "सोलर पॅनल": "solarPanel",
+    "रॅम्प स्थिती": "rampStatus",
+    "किचन शेड स्थिती": "kitchenStatus",
+    "किचन शेड दुरुस्ती रक्कम/प्रस्ताव": "kitchenCost",
+    "अग्निशमन यंत्र": "fireExt",
+    "संरक्षण भिंत प्रकार": "wallType",
+    "संरक्षण भिंत स्थिती": "wallStatus",
+    "क्रीडांगण उपलब्धता": "playgroundAvail",
+    "क्रीडांगण क्षेत्रफळ": "playgroundArea",
+    "विज्ञान प्रयोगशाळा": "sciLabAvail",
+    "लायब्ररी": "libAvail",
+    "वायफाय सुविधा": "wifiAvail",
+    "परस बाग": "gardenAvail",
+    "शिष्यवृत्ती सहभाग विद्यार्थी": "scholPart",
+    "शिष्यवृत्ती पात्र विद्यार्थी": "scholPass",
+    "विशेष उपक्रम": "specAct",
+    "अभिप्राय": "officerFeedback",
+    "भेट दिनांक": "visitDate",
+    "अधिकाऱ्याचे नाव": "officerName",
+    "हुद्दा": "officerDesignation"
+  };
+
+  for (const [key, elementId] of Object.entries(FIELD_MAP)) {
+    if (row[key] !== undefined && row[key] !== null) {
+      const el = document.getElementById(elementId);
+      if (el) el.value = row[key];
+    }
+  }
+
+  // संगणक प्रयोगशाळा व संख्या
+  if (row["संगणक प्रयोगशाळा"]) {
+    const text = String(row["संगणक प्रयोगशाळा"]);
+    document.getElementById("compLabAvail").value = text.includes("आहे") ? "आहे" : "नाही";
+    const m = text.match(/संख्या:\s*(\d+)/);
+    if (m) document.getElementById("compLabCount").value = m[1];
+  }
+
+  // डिजीटल साहित्य व संख्या
+  if (row["डिजीटल साहित्य"]) {
+    const text = String(row["डिजीटल साहित्य"]);
+    document.getElementById("digiMatAvail").value = text.includes("आहे") ? "आहे" : "नाही";
+    const m = text.match(/संख्या:\s*(\d+)/);
+    if (m) document.getElementById("digiMatCount").value = m[1];
+  }
+
+  // बोलक्या भिंती व संख्या
+  if (row["बोलक्या भिंती"]) {
+    const text = String(row["बोलक्या भिंती"]);
+    document.getElementById("wallPaintAvail").value = text.includes("आहे") ? "आहे" : "नाही";
+    const m = text.match(/संख्या:\s*(\d+)/);
+    if (m) document.getElementById("wallPaintCount").value = m[1];
+  }
+
+  // खेळासाठी साहित्य व विवरण
+  if (row["खेळासाठी साहित्य"]) {
+    const text = String(row["खेळासाठी साहित्य"]);
+    document.getElementById("playMatAvail").value = text.includes("आहे") ? "आहे" : "नाही";
+    const parts = text.split("- विवरण:");
+    if (parts.length > 1) document.getElementById("playMatDesc").value = parts[1].trim();
+  }
+
+  triggerAllDependencies();
+}
+
+// शाळा निवडल्यानंतर ऑनलाइन डेटा शोधणे व भरणे
+async function checkAndFetchSchoolData(schoolName, udise) {
+  const statusEl = document.getElementById("fetchStatus");
+  statusEl.style.display = "block";
+  statusEl.style.background = "#eaf0fb";
+  statusEl.style.color = "#2f5aa8";
+  statusEl.innerText = "⏳ पूर्वीचा डेटा शोधत आहे...";
+
+  try {
+    // कॅश रिकामा असेल तरच वेब अ‍ॅपवरून डेटा आणा
+    if (ALL_ONLINE_DATA.length === 0) {
+      const res = await fetch(WEB_APP_URL);
+      ALL_ONLINE_DATA = await res.json();
+    }
+
+    // शाळेच्या नावाने किंवा UDISE ने शेवटचा रेकॉर्ड शोधणे
+    const matchedRows = ALL_ONLINE_DATA.filter(r => 
+      (r["शाळेचे नाव"] && r["शाळेचे नाव"].trim() === schoolName.trim()) ||
+      (udise && r["युडायस (U-DISE) नंबर"] && String(r["युडायस (U-DISE) नंबर"]).trim() === String(udise).trim())
+    );
+
+    if (matchedRows.length > 0) {
+      const latestData = matchedRows[matchedRows.length - 1]; // सर्वात शेवटचा सबमिट केलेला डेटा
+      populateFormData(latestData);
+      statusEl.style.background = "#e6f4ea";
+      statusEl.style.color = "#137333";
+      statusEl.innerText = "✅ पूर्वी भरलेली माहिती लोड झाली! आपण यात बदल करू शकता.";
+    } else {
+      resetFormFields();
+      statusEl.style.background = "#f1f3f4";
+      statusEl.style.color = "#555";
+      statusEl.innerText = "ℹ️ या शाळेची पूर्वीची माहिती उपलब्ध नाही. नवीन माहिती भरा.";
+    }
+  } catch (err) {
+    console.error("Fetch data error:", err);
+    statusEl.style.background = "#fce8e6";
+    statusEl.style.color = "#c5221f";
+    statusEl.innerText = "⚠️ डेटा सिंक करताना अडचण आली. आपण थेट माहिती भरू शकता.";
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -668,6 +872,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const udiseInput = document.getElementById("udise");
     const hmNameInput = document.getElementById("hmName");
     const teacherWorkingInput = document.getElementById("teacherWorking");
+    const statusEl = document.getElementById("fetchStatus");
 
     if (val === "other") {
       otherGroup.style.display = "block";
@@ -675,11 +880,15 @@ document.addEventListener("DOMContentLoaded", () => {
       udiseInput.value = ""; hmNameInput.value = ""; teacherWorkingInput.value = "";
       udiseInput.removeAttribute("readonly"); hmNameInput.removeAttribute("readonly"); teacherWorkingInput.removeAttribute("readonly");
       udiseInput.placeholder = "नवीन युडायस नंबर टाका"; hmNameInput.placeholder = "मुख्याध्यापकांचे नाव टाका";
+      resetFormFields();
+      statusEl.style.display = "none";
     } else if (val === "") {
       otherGroup.style.display = "none";
       document.getElementById("otherSchoolName").removeAttribute("required");
       udiseInput.value = ""; hmNameInput.value = ""; teacherWorkingInput.value = "";
       udiseInput.setAttribute("readonly", "true"); hmNameInput.setAttribute("readonly", "true"); teacherWorkingInput.setAttribute("readonly", "true");
+      resetFormFields();
+      statusEl.style.display = "none";
     } else {
       otherGroup.style.display = "none";
       document.getElementById("otherSchoolName").removeAttribute("required");
@@ -690,6 +899,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const teachersList = TEACHERS_DATA[schoolName] || [];
       teacherWorkingInput.value = teachersList.length;
       udiseInput.setAttribute("readonly", "true"); hmNameInput.setAttribute("readonly", "true"); teacherWorkingInput.setAttribute("readonly", "true");
+      
+      // शाळा निवडल्याबरोबर ऑनलाइन डेटा शोधून फॉर्म भरणे
+      checkAndFetchSchoolData(schoolName, selectedSchool.udise);
     }
   });
 
@@ -858,6 +1070,7 @@ function fetchAndExportCombinedExcel() {
         alert("कोणताही डेटा सापडला नाही.");
         btn.innerText = "📥 डेटा सिंक व एक्सेल डाउनलोड"; btn.disabled = false; return;
       }
+      ALL_ONLINE_DATA = data; // कॅश अपडेट करणे
       const ws = XLSX.utils.json_to_sheet(data);
       ws['!pageSetup'] = { orientation: 'landscape', paperSize: 9 }; 
       const wb = XLSX.utils.book_new();
@@ -871,7 +1084,6 @@ function fetchAndExportCombinedExcel() {
     });
 }
 
-// --- नवीन: सर्व ३३ प्रश्न २ टेबल्समध्ये विभागलेले (एकाच पानावर ५ शाळा) ---
 function fetchAndExportCombinedPDF() {
   const btn = document.getElementById("fetchPdfBtn");
   btn.innerText = "⏳ PDF तयार करत आहे...";
@@ -886,8 +1098,8 @@ function fetchAndExportCombinedPDF() {
         btn.disabled = false;
         return;
       }
+      ALL_ONLINE_DATA = data; // कॅश अपडेट करणे
 
-      // भाग १ (पहिले ३ विभाग)
       const sectionsPart1 = [
         {
           title: "१. शाळा, विद्यार्थी व कर्मचारी",
@@ -903,7 +1115,6 @@ function fetchAndExportCombinedPDF() {
         }
       ];
 
-      // भाग २ (उर्वरित ३ विभाग) - ओळख पटण्यासाठी 'शाळेचे नाव' सोबत ठेवले आहे
       const sectionsPart2 = [
         {
           title: "शाळेची ओळख",
@@ -944,7 +1155,6 @@ function fetchAndExportCombinedPDF() {
                 .replace("नवीन आवश्यक", "नवीन आव.");
       }
 
-      // टेबल बनवणारे फंक्शन
       function generateTable(sections, chunkData) {
         const headersHtml = `
           <tr>
@@ -971,7 +1181,6 @@ function fetchAndExportCombinedPDF() {
         return `<table><thead>${headersHtml}</thead><tbody>${rowsHtml}</tbody></table>`;
       }
 
-      // डेटा ५-५ शाळांच्या गटात (Chunks) विभागणे
       let pagesHtml = "";
       for (let i = 0; i < data.length; i += 5) {
         let chunk = data.slice(i, i + 5);
@@ -998,30 +1207,21 @@ function fetchAndExportCombinedPDF() {
           <title>सर्व शाळांचा एकत्रित अहवाल</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&display=swap');
-            
             @page { size: A4 landscape; margin: 6mm; }
             body { font-family: 'Mukta', sans-serif; color: #000; background: #fff; margin: 0; padding: 0; }
             h2 { text-align: center; font-size: 11pt; margin: 0 0 6px 0; color: #1c2b4a; }
-            
             .page { page-break-after: always; width: 100%; box-sizing: border-box; }
             .page:last-child { page-break-after: auto; }
-            
             table { width: 100%; border-collapse: collapse; table-layout: auto; margin-bottom: 5px; }
             th, td { border: 0.5px solid #222; padding: 2px; text-align: center; vertical-align: middle; word-wrap: break-word; }
             th { background-color: #f0f0f0; color: #000; }
-            
             .main-th { font-size: 8pt; font-weight: 700; padding: 3px; border-bottom: 1.5px solid #000; }
             .sub-th { height: 90px; }
-            
             .vert { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; margin: 0 auto; font-size: 6pt; max-height: 85px; }
             .text-header { font-size: 6.5pt; font-weight: 700; max-width: 60px; text-align: center; white-space: normal; }
-            
             .text-cell { text-align: left; font-size: 6.5pt; max-width: 80px; line-height: 1.2; }
             .num-cell { text-align: center; font-size: 7pt; font-weight: 600; min-width: 14px; }
-            
             tbody tr td { min-height: 25px; height: 30px; } 
-            
-            /* दोन टेबल्स मधील अंतर */
             .table-gap { height: 15px; } 
           </style>
         </head>
@@ -1061,18 +1261,21 @@ function submitOnline() {
   const btn = document.getElementById("onlineSubmitBtn");
   btn.innerText = "⏳ पाठवत आहे..."; btn.disabled = true;
 
+  const payload = getFormDataObj();
+
   fetch(WEB_APP_URL, {
     method: 'POST',
     mode: 'no-cors', 
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(getFormDataObj())
+    body: JSON.stringify(payload)
   }).then(() => {
-    alert("माहिती यशस्वीरित्या ऑनलाईन सबमिट झाली!");
-    btn.innerText = "☁️ सबमिट"; btn.disabled = false;
+    alert("माहिती यशस्वीरित्या ऑनलाईन सबमिट / अपडेट झाली!");
+    ALL_ONLINE_DATA = []; // नवीन डेटा पुन्हा फेच व्हावा म्हणून कॅश रिकामा करा
+    btn.innerText = "☁️ सबमिट / अपडेट"; btn.disabled = false;
   }).catch((error) => {
     alert("तांत्रिक अडचण! कृपया पुन्हा प्रयत्न करा.");
     console.error("Error:", error);
-    btn.innerText = "☁️ सबमिट"; btn.disabled = false;
+    btn.innerText = "☁️ सबमिट / अपडेट"; btn.disabled = false;
   });
 }
 </script>
